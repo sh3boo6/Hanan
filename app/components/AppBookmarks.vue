@@ -145,7 +145,8 @@ const defaultBookmarks: BookmarkCategory[] = [
       { label: 'نظام فارس', link: 'https://sshr.moe.gov.sa', icon: getFaviconUrl('https://sshr.moe.gov.sa') },
       { label: 'منصة مدرستي', link: 'https://schools.madrasati.sa', icon: getFaviconUrl('https://schools.madrasati.sa') },
       { label: 'بوابة الدعم الموحد', link: 'https://usc.moe.gov.sa/moe_csm', icon: getFaviconUrl('https://usc.moe.gov.sa/moe_csm') },
-      { label: 'البريد الوزاري', link: 'https://webmail.moe.gov.sa', icon: getFaviconUrl('https://webmail.moe.gov.sa') }
+      { label: 'البريد الوزاري', link: 'https://webmail.moe.gov.sa', icon: getFaviconUrl('https://webmail.moe.gov.sa') },
+      { label: 'حضوري', link: 'https://hather-ui.moe.gov.sa/', icon: 'i-lucide-fingerprint-pattern' }
     ]
   }
 ]
