@@ -337,7 +337,7 @@ const isNotToday = computed(() => {
       </div>
 
       <!-- زر عائم أو جانبي يفتح الـ Drawer للشاشات الأصغر من xl -->
-      <div class="xl:hidden mt-4 px-4">
+      <div class="xl:hidden mt-0 px-4">
         <UButton
           icon="i-lucide-calendar-days"
           color="primary"

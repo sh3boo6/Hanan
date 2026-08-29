@@ -47,7 +47,8 @@ const items = ref<NavigationMenuItem[]>([
                 variant="ghost"
               />
               <template #body>
-                <div class="flex border-b border-default pb-3">
+                <AppSearch class="flex mb-1 -top-2 xl:hidden" />
+                <div class="flex border-b border-default pb-1">
                   <div class="border-e border-default pe-2 me-3 flex justify-start">
                     <UNavigationMenu
                       :items="items"
@@ -61,7 +62,6 @@ const items = ref<NavigationMenuItem[]>([
                     <AppCalendar />
                   </ClientOnly>
                 </div>
-                <AppSearch class="flex my-3 xl:hidden" />
                 <AppQR class="mt-2" />
               </template>
             </USlideover>

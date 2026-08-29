@@ -45,7 +45,7 @@ const onSearchSubmit = () => {
 <template>
   <div class="relative w-full">
     <form
-      class="flex w-full items-center gap-3 bg-white dark:bg-zinc-900 border border-default rounded-full px-4 py-2 shadow-sm hover:shadow-md transition-shadow"
+      class="flex w-full items-center gap-3 bg-white dark:bg-zinc-900 border border-default rounded-full px-4 py-1.5 shadow-sm hover:shadow-md transition-shadow"
       @submit.prevent="onSearchSubmit"
     >
       <UIcon
