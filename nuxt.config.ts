@@ -8,6 +8,7 @@ export default defineNuxtConfig({
 
   app: {
     head: {
+      viewport: 'width=device-width, initial-scale=1.5, maximum-scale=1.5, user-scalable=no',
       link: [
         { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
         { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: 'anonymous' },
@@ -20,8 +21,7 @@ export default defineNuxtConfig({
         { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/icons/ios/32.png' },
         { rel: 'icon', type: 'image/png', sizes: '96x96', href: '/icons/android/launchericon-96x96.png' },
         { rel: 'apple-touch-icon', sizes: '180x180', href: '/icons/ios/180.png' },
-        { rel: 'manifest', href: '/manifest.webmanifest' },
-        { rel: 'browserconfig', href: '/browserconfig.xml' }
+        { rel: 'manifest', href: '/manifest.webmanifest' }
       ]
     }
   },

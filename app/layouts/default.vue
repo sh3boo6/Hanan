@@ -22,7 +22,9 @@ const items = ref<NavigationMenuItem[]>([
       <!-- Header -->
       <header class="h-20 flex items-center px-8 bg-accented/20 border-b border-default shrink-0">
         <div class="flex items-center justify-between w-full">
-          <AppLogo class="h-14" />
+          <ULink to="/">
+            <AppLogo class="h-14" />
+          </ULink>
           <UNavigationMenu
             :items="items"
             class="hidden xl:flex"
@@ -73,10 +75,22 @@ const items = ref<NavigationMenuItem[]>([
       </main>
 
       <!-- Footer -->
-      <footer class="h-14 flex text-sm items-center justify-center xl:justify-end text-muted px-6 xl:px-10 border-t border-default shrink-0">
-        جميع الحقوق محفوظة - <AppName class="font-semibold" /> {{ new Date().getFullYear() }} &copy;
-        <span class="hidden xl:inline">- هذه النسخه تجريبية | الاصدار 1.0.0</span>
-        <AppLogo class="h-8 inline ms-1" />
+      <footer
+        class="h-14 px-6 xl:px-10 border-t border-default shrink-0 flex flex-row items-center justify-between"
+        dir="rtl"
+      >
+        <div class="text-xs font-medium text-muted">
+          الثانوية الثانية بالمخواة
+        </div>
+        <div class="flex text-xs items-center gap-1.5 text-muted">
+          <span>جميع الحقوق محفوظة</span>
+          <span>-</span>
+          <span class="flex items-center gap-1">
+            <AppName class="font-semibold" /> {{ new Date().getFullYear() }} &copy;
+          </span>
+          <span class="hidden xl:inline text-xs opacity-75">| هذه النسخة تجريبية - الإصدار 1.0.0</span>
+          <AppLogo class="h-6 inline ms-0.5 align-middle" />
+        </div>
       </footer>
     </div>
 

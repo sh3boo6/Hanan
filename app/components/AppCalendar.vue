@@ -23,6 +23,7 @@ const state = reactive<Partial<Schema>>({
 })
 
 const addEventModal = ref(false)
+const addEventDrawer = ref(false) // حالة الـ Drawer للشاشات الصغيرة
 const toast = useToast()
 
 // متغيرات التحكم بنافذة تأكيد الحذف
@@ -73,6 +74,7 @@ async function onSubmit(_event: FormSubmitEvent<Schema>) {
   toast.add({ title: 'نجاح', description: 'تم اضافة الحدث بنجاح.', color: 'success' })
   state.title = ''
   addEventModal.value = false
+  addEventDrawer.value = false // إغلاق الـ Drawer بعد الإضافة
 }
 
 // فتح نافذة تأكيد الحذف
@@ -202,7 +204,6 @@ const isNotToday = computed(() => {
 <template>
   <div class="flex-1 flex flex-col">
     <div class="flex items-center gap-1 mb-3 border-b border-b-default border-b-dashed pb-3 h-16">
-      <!-- يتحول لون الزر إلى primary إذا لم يكن اليوم الحالي، وإلى neutral إذا كان هو اليوم الحالي -->
       <UButton
         size="md"
         :color="isNotToday ? 'primary' : 'neutral'"
@@ -263,7 +264,8 @@ const isNotToday = computed(() => {
         <span>{{ currentDescription }}</span>
       </div>
 
-      <div class="border border-dashed text-primary font-semibold border-primary/40 rounded-2xl bg-primary/5 mt-auto flex flex-col justify-center px-4 py-2 text-sm gap-3">
+      <!-- محتوى الأحداث للشاشات الكبيرة (xl فما فوق) -->
+      <div class="hidden xl:flex border border-dashed text-primary font-semibold border-primary/40 rounded-2xl bg-primary/5 mt-auto flex-col justify-center px-4 py-2 text-sm gap-3">
         <UModal
           v-model:open="addEventModal"
           title="اضافة حدث"
@@ -301,33 +303,6 @@ const isNotToday = computed(() => {
           </template>
         </UModal>
 
-        <!-- نافذة منبثقة لتأكيد الحذف -->
-        <UModal
-          v-model:open="deleteConfirmModal"
-          title="تأكيد الحذف"
-        >
-          <template #body>
-            <div class="space-y-4">
-              <p class="text-sm text-muted">
-                هل أنت متأكد من رغبتك في حذف هذا الحدث؟ لا يمكن التراجع عن هذا الإجراء.
-              </p>
-              <div class="flex justify-end gap-2">
-                <UButton
-                  color="neutral"
-                  variant="subtle"
-                  label="إلغاء"
-                  @click="deleteConfirmModal = false"
-                />
-                <UButton
-                  color="error"
-                  label="تأكيد الحذف"
-                  @click="confirmDeleteEvent"
-                />
-              </div>
-            </div>
-          </template>
-        </UModal>
-
         <template v-if="selectedEvents.length > 0">
           <div
             v-for="(event, index) in selectedEvents"
@@ -343,7 +318,6 @@ const isNotToday = computed(() => {
                 الموافق: {{ event.hijriText }}
               </span>
             </div>
-            <!-- زر الحذف يفتح نافذة التأكيد -->
             <UButton
               v-if="event.isCustom"
               size="xs"
@@ -361,6 +335,124 @@ const isNotToday = computed(() => {
           لا توجد احداث مسجلة في هذا التاريخ.
         </span>
       </div>
+
+      <!-- زر عائم أو جانبي يفتح الـ Drawer للشاشات الأصغر من xl -->
+      <div class="xl:hidden mt-4 px-4">
+        <UButton
+          icon="i-lucide-calendar-days"
+          color="primary"
+          block
+          variant="solid"
+          @click="addEventDrawer = true"
+        >
+          عرض أحداث اليوم وإضافة حدث ({{ selectedEvents.length }})
+        </UButton>
+      </div>
+
+      <!-- نافذة Drawer للشاشات الصغيرة أقل من xl -->
+      <UDrawer
+        v-model:open="addEventDrawer"
+        title="أحداث اليوم والتحكم بها"
+      >
+        <template #body>
+          <div class="space-y-6">
+            <!-- قسم إضافة حدث داخل الـ Drawer -->
+            <div class="p-4 border border-dashed border-primary/40 rounded-2xl bg-primary/5 space-y-3">
+              <h3 class="text-sm font-semibold text-primary">
+                اضافة حدث جديد
+              </h3>
+              <UForm
+                :schema="schema"
+                :state="state"
+                class="space-y-3"
+                @submit="onSubmit"
+              >
+                <UFormField
+                  label="عنوان الحدث"
+                  name="title"
+                >
+                  <UInput
+                    v-model="state.title"
+                    class="block w-full"
+                  />
+                </UFormField>
+                <UButton
+                  type="submit"
+                  size="sm"
+                  class="mt-2"
+                >
+                  اضافة
+                </UButton>
+              </UForm>
+            </div>
+
+            <!-- قائمة الأحداث داخل الـ Drawer -->
+            <div class="space-y-3">
+              <h3 class="text-sm font-semibold text-muted">
+                الأحداث المسجلة في هذا التاريخ:
+              </h3>
+              <template v-if="selectedEvents.length > 0">
+                <div
+                  v-for="(event, index) in selectedEvents"
+                  :key="index"
+                  class="flex items-center justify-between border-b border-dashed border-default pb-2 last:border-0"
+                >
+                  <div class="flex flex-col">
+                    <span class="text-sm font-medium">{{ event.title }}</span>
+                    <span
+                      v-if="'hijriText' in event && event.hijriText"
+                      class="text-xs text-muted font-normal"
+                    >
+                      الموافق: {{ event.hijriText }}
+                    </span>
+                  </div>
+                  <UButton
+                    v-if="event.isCustom"
+                    size="xs"
+                    color="error"
+                    variant="ghost"
+                    icon="i-lucide-trash"
+                    @click="promptDeleteEvent(event.id)"
+                  />
+                </div>
+              </template>
+              <span
+                v-else
+                class="text-xs text-muted font-normal"
+              >
+                لا توجد احداث مسجلة في هذا التاريخ.
+              </span>
+            </div>
+          </div>
+        </template>
+      </UDrawer>
+
+      <!-- نافذة منبثقة لتأكيد الحذف (مشتركة) -->
+      <UModal
+        v-model:open="deleteConfirmModal"
+        title="تأكيد الحذف"
+      >
+        <template #body>
+          <div class="space-y-4">
+            <p class="text-sm text-muted">
+              هل أنت متأكد من رغبتك في حذف هذا الحدث؟ لا يمكن التراجع عن هذا الإجراء.
+            </p>
+            <div class="flex justify-end gap-2">
+              <UButton
+                color="neutral"
+                variant="subtle"
+                label="إلغاء"
+                @click="deleteConfirmModal = false"
+              />
+              <UButton
+                color="error"
+                label="تأكيد الحذف"
+                @click="confirmDeleteEvent"
+              />
+            </div>
+          </div>
+        </template>
+      </UModal>
     </div>
   </div>
 </template>
