@@ -99,7 +99,7 @@ watchEffect(() => {
       />
       <span class="text-sm font-bold flex items-center gap-0.5">
         <span v-if="loading">...</span>
-        <span v-else-if="temperature !== null">{{ temperature + 2 }}°</span>
+        <span v-else-if="temperature !== null">{{ temperature }}°</span>
         <span v-else>--</span>
         <UIcon
           name="i-lucide-thermometer"
