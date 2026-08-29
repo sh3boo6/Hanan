@@ -1,0 +1,610 @@
+[
+  {
+    "type": "annual",
+    "month": 2,
+    "day": 22,
+    "title": "🇸🇦 يوم التأسيس السعودي"
+  },
+  {
+    "type": "annual",
+    "month": 9,
+    "day": 23,
+    "title": "🇸🇦 اليوم الوطني السعودي"
+  },
+  {
+    "type": "annual",
+    "month": 10,
+    "day": 5,
+    "title": "👨‍🏫 اليوم العالمي للمعلم"
+  },
+  { "type": "monthly", "targetDay": 10, "title": "💳 حساب المواطن" },
+  { "type": "monthly", "targetDay": 27, "title": "💰  الراتب" },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 8, "day": 23 },
+    "end": { "year": 2026, "month": 8, "day": 23 },
+    "title": "🔔 بداية العام الدراسي 1448 هـ"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 9, "day": 23 },
+    "end": { "year": 2026, "month": 9, "day": 26 },
+    "title": "🎉 إجازة اليوم الوطني السعودي 96"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 10, "day": 25 },
+    "end": { "year": 2026, "month": 10, "day": 25 },
+    "title": "اجازة مطولة"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 11, "day": 20 },
+    "end": { "year": 2026, "month": 11, "day": 28 },
+    "title": "🍂 إجازة الخريف 1448"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 11, "day": 29 },
+    "end": { "year": 2026, "month": 11, "day": 29 },
+    "title": "اجازة مطولة"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2027, "month": 1, "day": 8 },
+    "end": { "year": 2027, "month": 1, "day": 16 },
+    "title": "⛺ إجازة منتصف العام الدراسي 1448"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2027, "month": 1, "day": 7 },
+    "end": { "year": 2027, "month": 1, "day": 7 },
+    "title": "اجازة مطولة"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2027, "month": 2, "day": 19 },
+    "end": { "year": 2027, "month": 2, "day": 22 },
+    "title": "🇸🇦 إجازة يوم التأسيس 2027"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2027, "month": 2, "day": 26 },
+    "end": { "year": 2027, "month": 3, "day": 13 },
+    "title": "🌙 إجازة عيد الفطر 1448"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2027, "month": 4, "day": 11 },
+    "end": { "year": 2027, "month": 4, "day": 11 },
+    "title": "اجازة مطولة"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2027, "month": 5, "day": 7 },
+    "end": { "year": 2027, "month": 5, "day": 22 },
+    "title": "🐑 إجازة عيد الأضحى 1448"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2027, "month": 6, "day": 24 },
+    "end": { "year": 2027, "month": 6, "day": 24 },
+    "title": "🏁 إجازة نهاية العام الدراسي 1448"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2027, "month": 8, "day": 22 },
+    "end": { "year": 2027, "month": 8, "day": 22 },
+    "title": "🔔 بداية العام الدراسي 1449 هـ"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 1, "day": 1 },
+    "end": { "year": 2026, "month": 1, "day": 1 },
+    "title": "يوم إطلاق (عش بصحة)"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 1, "day": 15 },
+    "end": { "year": 2026, "month": 1, "day": 15 },
+    "title": "يوم الطفل الخليجي"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 2, "day": 1 },
+    "end": { "year": 2026, "month": 2, "day": 7 },
+    "title": "الأسبوع الخليجي للتوعية بالسرطان"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 2, "day": 4 },
+    "end": { "year": 2026, "month": 2, "day": 4 },
+    "title": "اليوم العالمي للسرطان"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 2, "day": 9 },
+    "end": { "year": 2026, "month": 2, "day": 9 },
+    "title": "اليوم العالمي للصرع"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 2, "day": 15 },
+    "end": { "year": 2026, "month": 2, "day": 15 },
+    "title": "اليوم العالمي لسرطان الأطفال"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 2, "day": 21 },
+    "end": { "year": 2026, "month": 2, "day": 21 },
+    "title": "اليوم السعودي للزواج الصحي"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 2, "day": 23 },
+    "end": { "year": 2026, "month": 3, "day": 1 },
+    "title": "الأسبوع العالمي لاضطرابات الأكل"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 3, "day": 1 },
+    "end": { "year": 2026, "month": 3, "day": 31 },
+    "title": "الشهر العالمي للتوعية بسرطان القولون والمستقيم"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 3, "day": 1 },
+    "end": { "year": 2026, "month": 3, "day": 31 },
+    "title": "الشهر العالمي للتغذية"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 3, "day": 3 },
+    "end": { "year": 2026, "month": 3, "day": 3 },
+    "title": "اليوم العالمي للسمع"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 3, "day": 4 },
+    "end": { "year": 2026, "month": 3, "day": 4 },
+    "title": "اليوم العالمي لمكافحة السمنة"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 3, "day": 8 },
+    "end": { "year": 2026, "month": 3, "day": 14 },
+    "title": "الأسبوع العالمي للجلوكوما (المياه الزرقاء)"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 3, "day": 12 },
+    "end": { "year": 2026, "month": 3, "day": 12 },
+    "title": "اليوم العالمي للكلى"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 3, "day": 13 },
+    "end": { "year": 2026, "month": 3, "day": 13 },
+    "title": "يوم النوم العالمي"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 3, "day": 20 },
+    "end": { "year": 2026, "month": 3, "day": 20 },
+    "title": "اليوم العالمي لصحة الفم والأسنان"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 3, "day": 21 },
+    "end": { "year": 2026, "month": 3, "day": 21 },
+    "title": "اليوم العالمي لمتلازمة داون"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 3, "day": 23 },
+    "end": { "year": 2026, "month": 3, "day": 23 },
+    "title": "اليوم العالمي للبصريات"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 3, "day": 24 },
+    "end": { "year": 2026, "month": 3, "day": 24 },
+    "title": "اليوم العالمي للدرن"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 3, "day": 25 },
+    "end": { "year": 2026, "month": 3, "day": 31 },
+    "title": "الأسبوع الخليجي للفم والأسنان"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 3, "day": 30 },
+    "end": { "year": 2026, "month": 3, "day": 30 },
+    "title": "اليوم العالمي لثنائي القطب"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 4, "day": 1 },
+    "end": { "year": 2026, "month": 4, "day": 30 },
+    "title": "شهر التوعية بالقولون العصبي"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 4, "day": 1 },
+    "end": { "year": 2026, "month": 4, "day": 1 },
+    "title": "اليوم الوطني للمشي"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 4, "day": 2 },
+    "end": { "year": 2026, "month": 4, "day": 2 },
+    "title": "اليوم العالمي للتوحد"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 4, "day": 7 },
+    "end": { "year": 2026, "month": 4, "day": 7 },
+    "title": "يوم الصحة العالمي"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 4, "day": 11 },
+    "end": { "year": 2026, "month": 4, "day": 11 },
+    "title": "اليوم العالمي للشلل الرعاش"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 4, "day": 26 },
+    "end": { "year": 2026, "month": 4, "day": 30 },
+    "title": "الأسبوع العالمي للتحصينات"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 5, "day": 1 },
+    "end": { "year": 2026, "month": 5, "day": 31 },
+    "title": "الشهر العالمي لسرطان الجلد"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 5, "day": 1 },
+    "end": { "year": 2026, "month": 5, "day": 31 },
+    "title": "شهر التوعية بسرطان المثانة"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 5, "day": 1 },
+    "end": { "year": 2026, "month": 5, "day": 31 },
+    "title": "الشهر العالمي للتوعية بالسيلياك"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 5, "day": 6 },
+    "end": { "year": 2026, "month": 5, "day": 6 },
+    "title": "اليوم العالمي للربو"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 5, "day": 8 },
+    "end": { "year": 2026, "month": 5, "day": 8 },
+    "title": "اليوم العالمي للثيلاسيما"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 5, "day": 8 },
+    "end": { "year": 2026, "month": 5, "day": 8 },
+    "title": "اليوم العالمي لسرطان المبيض"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 5, "day": 10 },
+    "end": { "year": 2026, "month": 5, "day": 10 },
+    "title": "اليوم العالمي للذئبة"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 5, "day": 12 },
+    "end": { "year": 2026, "month": 5, "day": 18 },
+    "title": "الأسبوع العالمي للملح"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 5, "day": 12 },
+    "end": { "year": 2026, "month": 5, "day": 12 },
+    "title": "اليوم العالمي للتمريض"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 5, "day": 17 },
+    "end": { "year": 2026, "month": 5, "day": 17 },
+    "title": "اليوم العالمي لارتفاع ضغط الدم"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 5, "day": 22 },
+    "end": { "year": 2026, "month": 5, "day": 22 },
+    "title": "اليوم العالمي لتسمم الحمل"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 5, "day": 23 },
+    "end": { "year": 2026, "month": 5, "day": 28 },
+    "title": "الأسبوع العالمي للتوعية بمرض قِصَر النظر"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 5, "day": 30 },
+    "end": { "year": 2026, "month": 5, "day": 30 },
+    "title": "اليوم العالمي للتصلب اللويحي المتعدد"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 5, "day": 31 },
+    "end": { "year": 2026, "month": 5, "day": 31 },
+    "title": "اليوم العالمي لمكافحة التدخين"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 6, "day": 5 },
+    "end": { "year": 2026, "month": 6, "day": 5 },
+    "title": "اليوم العالمي للبيئة"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 6, "day": 7 },
+    "end": { "year": 2026, "month": 6, "day": 7 },
+    "title": "اليوم العالمي لسلامة الغذاء"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 6, "day": 8 },
+    "end": { "year": 2026, "month": 6, "day": 8 },
+    "title": "اليوم العالمي لسرطان الدماغ"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 6, "day": 13 },
+    "end": { "year": 2026, "month": 6, "day": 13 },
+    "title": "اليوم العالمي للمهق"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 6, "day": 14 },
+    "end": { "year": 2026, "month": 6, "day": 14 },
+    "title": "اليوم العالمي للتبرع بالدم"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 6, "day": 15 },
+    "end": { "year": 2026, "month": 6, "day": 15 },
+    "title": "اليوم العالمي للتوعية بشأن إساءة معاملة المسنين"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 6, "day": 19 },
+    "end": { "year": 2026, "month": 6, "day": 19 },
+    "title": "اليوم العالمي للأنيميا المنجلية"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 6, "day": 25 },
+    "end": { "year": 2026, "month": 6, "day": 25 },
+    "title": "اليوم العالمي للبهاق"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 6, "day": 27 },
+    "end": { "year": 2026, "month": 6, "day": 27 },
+    "title": "اليوم العالمي لاضطراب ما بعد الصدمة"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 7, "day": 1 },
+    "end": { "year": 2026, "month": 7, "day": 31 },
+    "title": "الشهر العالمي لسرطان العظام"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 7, "day": 25 },
+    "end": { "year": 2026, "month": 7, "day": 25 },
+    "title": "اليوم العالمي للوقاية من الغرق"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 7, "day": 28 },
+    "end": { "year": 2026, "month": 7, "day": 28 },
+    "title": "اليوم العالمي للالتهاب الكبدي الفيروسي"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 8, "day": 1 },
+    "end": { "year": 2026, "month": 8, "day": 31 },
+    "title": "الشهر العالمي للصدفية"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 8, "day": 1 },
+    "end": { "year": 2026, "month": 8, "day": 31 },
+    "title": "الشهر الوطني للمناعة"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 8, "day": 1 },
+    "end": { "year": 2026, "month": 8, "day": 7 },
+    "title": "الأسبوع العالمي للرضاعة الطبيعية"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 9, "day": 1 },
+    "end": { "year": 2026, "month": 9, "day": 30 },
+    "title": "الشهر العالمي لسرطان الدم"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 9, "day": 8 },
+    "end": { "year": 2026, "month": 9, "day": 8 },
+    "title": "اليوم العالمي للعلاج الطبيعي"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 9, "day": 9 },
+    "end": { "year": 2026, "month": 9, "day": 9 },
+    "title": "اليوم العالمي للتعزيز الصحي"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 9, "day": 12 },
+    "end": { "year": 2026, "month": 9, "day": 12 },
+    "title": "اليوم العالمي للإسعافات الأولية"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 9, "day": 17 },
+    "end": { "year": 2026, "month": 9, "day": 17 },
+    "title": "اليوم العالمي لسلامة المرضى"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 9, "day": 21 },
+    "end": { "year": 2026, "month": 9, "day": 21 },
+    "title": "اليوم العالمي للزهايمر"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 9, "day": 23 },
+    "end": { "year": 2026, "month": 9, "day": 29 },
+    "title": "الأسبوع العالمي للتبرع بالأعضاء"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 9, "day": 25 },
+    "end": { "year": 2026, "month": 9, "day": 25 },
+    "title": "اليوم العالمي للصيادلة"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 9, "day": 29 },
+    "end": { "year": 2026, "month": 9, "day": 29 },
+    "title": "اليوم العالمي للقلب"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 10, "day": 1 },
+    "end": { "year": 2026, "month": 10, "day": 31 },
+    "title": "شهر التوعية بسرطان الثدي"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 10, "day": 1 },
+    "end": { "year": 2026, "month": 10, "day": 1 },
+    "title": "اليوم العالمي لكبار السن"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 10, "day": 8 },
+    "end": { "year": 2026, "month": 10, "day": 8 },
+    "title": "اليوم العالمي للإبصار"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 10, "day": 10 },
+    "end": { "year": 2026, "month": 10, "day": 10 },
+    "title": "اليوم العالمي للصحة النفسية"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 10, "day": 12 },
+    "end": { "year": 2026, "month": 10, "day": 12 },
+    "title": "اليوم العالمي لالتهاب المفاصل"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 10, "day": 13 },
+    "end": { "year": 2026, "month": 10, "day": 18 },
+    "title": "الأسبوع العالمي لمكافحة العدوى"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 10, "day": 15 },
+    "end": { "year": 2026, "month": 10, "day": 15 },
+    "title": "اليوم العالمي لغسل اليدين"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 10, "day": 20 },
+    "end": { "year": 2026, "month": 10, "day": 20 },
+    "title": "اليوم العالمي لهشاشة العظام"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 11, "day": 1 },
+    "end": { "year": 2026, "month": 11, "day": 30 },
+    "title": "الشهر العالمي لسرطان الرئة"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 11, "day": 3 },
+    "end": { "year": 2026, "month": 11, "day": 7 },
+    "title": "الأسبوع العالمي للتوتر"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 11, "day": 8 },
+    "end": { "year": 2026, "month": 11, "day": 14 },
+    "title": "الأسبوع الخليجي للسكري"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 11, "day": 12 },
+    "end": { "year": 2026, "month": 11, "day": 12 },
+    "title": "اليوم العالمي للالتهاب الرئوي"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 11, "day": 14 },
+    "end": { "year": 2026, "month": 11, "day": 14 },
+    "title": "اليوم العالمي للسكري"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 11, "day": 15 },
+    "end": { "year": 2026, "month": 11, "day": 15 },
+    "title": "اليوم العالمي للطفل الخديج"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 10, "day": 18 },
+    "end": { "year": 2026, "month": 10, "day": 24 },
+    "title": "الأسبوع العالمي للتوعية بمقاومة المضادات الحيوية"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 11, "day": 20 },
+    "end": { "year": 2026, "month": 11, "day": 20 },
+    "title": "اليوم العالمي للطفل"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 12, "day": 1 },
+    "end": { "year": 2026, "month": 12, "day": 1 },
+    "title": "اليوم العالمي للإيدز"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 12, "day": 3 },
+    "end": { "year": 2026, "month": 12, "day": 3 },
+    "title": "اليوم العالمي لذوي الإعاقة"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 12, "day": 3 },
+    "end": { "year": 2026, "month": 12, "day": 3 },
+    "title": "اليوم السعودي للرعاية الصحية المنزلية"
+  },
+  {
+    "type": "range",
+    "start": { "year": 2026, "month": 12, "day": 12 },
+    "end": { "year": 2026, "month": 12, "day": 12 },
+    "title": "اليوم العالمي للتغطية الصحية الشاملة"
+  }
+]
