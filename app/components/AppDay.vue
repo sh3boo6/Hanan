@@ -21,6 +21,8 @@ function updateDates() {
   const now = new Date()
 
   dayName.value = new Intl.DateTimeFormat(props.hijriLocale, { weekday: 'long' }).format(now)
+
+  // ضبط خصائص التاريخ الهجري لتطابق تماماً تنسيق التاريخ الميلادي (أرقام فقط للسنة والشهر واليوم)
   hijriDate.value = new Intl.DateTimeFormat(props.hijriLocale, {
     year: 'numeric',
     month: '2-digit',
