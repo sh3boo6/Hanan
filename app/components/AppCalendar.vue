@@ -23,14 +23,12 @@ const state = reactive<Partial<Schema>>({
 })
 
 const addEventModal = ref(false)
-const addEventDrawer = ref(false) // حالة الـ Drawer للشاشات الصغيرة
+const addEventDrawer = ref(false)
 const toast = useToast()
 
-// متغيرات التحكم بنافذة تأكيد الحذف
 const deleteConfirmModal = ref(false)
 const eventToDeleteId = ref<string | null>(null)
 
-// تعريف هيكل الحدث المحلي
 interface CustomEvent {
   id: string
   title: string
@@ -38,7 +36,6 @@ interface CustomEvent {
   type: string
 }
 
-// تخزين الأحداث المضافة محلياً مع مزامنتها مع localStorage
 const localEvents = ref<CustomEvent[]>([])
 
 onMounted(() => {
@@ -59,13 +56,14 @@ const saveToLocalStorage = () => {
 async function onSubmit(_event: FormSubmitEvent<Schema>) {
   if (!state.title) return
 
-  // حفظ التاريخ المحدد حالياً مع الحدث
-  const currentDate = calendarValue.value
+  // توحيد حفظ التاريخ بتحويله إلى التقويم الميلادي دائماً لضمان توافقه بين التقويمين
+  const gregorianDate = toCalendar(calendarValue.value, new GregorianCalendar())
+
   const newCustomEvent: CustomEvent = {
     id: Date.now().toString(),
     title: state.title,
-    date: { year: currentDate.year, month: currentDate.month, day: currentDate.day },
-    type: 'once' // نوع افتراضي للأحداث المضافة
+    date: { year: gregorianDate.year, month: gregorianDate.month, day: gregorianDate.day },
+    type: 'once'
   }
 
   localEvents.value.push(newCustomEvent)
@@ -74,16 +72,14 @@ async function onSubmit(_event: FormSubmitEvent<Schema>) {
   toast.add({ title: 'نجاح', description: 'تم اضافة الحدث بنجاح.', color: 'success' })
   state.title = ''
   addEventModal.value = false
-  addEventDrawer.value = false // إغلاق الـ Drawer بعد الإضافة
+  addEventDrawer.value = false
 }
 
-// فتح نافذة تأكيد الحذف
 const promptDeleteEvent = (id: string) => {
   eventToDeleteId.value = id
   deleteConfirmModal.value = true
 }
 
-// تنفيذ الحذف الفعلي بعد التأكيد
 const confirmDeleteEvent = () => {
   if (eventToDeleteId.value) {
     localEvents.value = localEvents.value.filter(e => e.id !== eventToDeleteId.value)
@@ -94,22 +90,25 @@ const confirmDeleteEvent = () => {
   eventToDeleteId.value = null
 }
 
-// استدعاء الـ Composable الخاص بالأحداث الأصلية ودمجها مع المحلية
 const { getEventsForDate } = useCalendarEvents()
+
+// دالة مساعدة لتوحيد ومقارنة التواريخ بغض النظر عن التقويم المعروض
+const isSameDay = (d1: { year: number, month: number, day: number }, d2: DateValue) => {
+  const converted = toCalendar(d2, new GregorianCalendar())
+  return d1.year === converted.year && d1.month === converted.month && d1.day === converted.day
+}
 
 const selectedEvents = computed(() => {
   const baseEvents = getEventsForDate(calendarValue.value, activeConfig.value.calendar)
   const displayBaseEvents = baseEvents.map(e => ({ ...e, isCustom: false as const }))
+
   const currentDayCustoms = localEvents.value.filter(
-    e => e.date.year === calendarValue.value.year
-      && e.date.month === calendarValue.value.month
-      && e.date.day === calendarValue.value.day
+    e => isSameDay(e.date, calendarValue.value)
   ).map(e => ({ ...e, isCustom: true }))
 
   return [...displayBaseEvents, ...currentDayCustoms]
 })
 
-// إعدادات التقويمات
 const calendarOptions = [
   {
     id: 'gregorian',
@@ -148,10 +147,10 @@ const typeColors: Record<string, string> = {
   range: 'bg-green-500'
 }
 
-const getDayEvents = (day: { year: number, month: number, day: number }) => {
+const getDayEvents = (day: DateValue) => {
   const baseEvents = getEventsForDate(day, activeConfig.value.calendar)
   const dayCustoms = localEvents.value.filter(
-    e => e.date.year === day.year && e.date.month === day.month && e.date.day === day.day
+    e => isSameDay(e.date, day)
   )
   return [...baseEvents, ...dayCustoms]
 }
@@ -189,7 +188,6 @@ const calendarValue = computed({
   }
 })
 
-// التحقق مما إذا كان التاريخ المحدد حالياً يختلف عن تاريخ اليوم (بالاعتماد على التقويم الميلادي الأساسي)
 const isNotToday = computed(() => {
   const t = now(getLocalTimeZone())
   const currentGregorian = toCalendar(calendarValue.value, new GregorianCalendar())
@@ -264,7 +262,6 @@ const isNotToday = computed(() => {
         <span>{{ currentDescription }}</span>
       </div>
 
-      <!-- محتوى الأحداث للشاشات الكبيرة (xl فما فوق) -->
       <div class="hidden xl:flex border border-dashed text-primary font-semibold border-primary/40 rounded-2xl bg-primary/5 mt-auto flex-col justify-center px-4 py-2 text-sm gap-3">
         <UModal
           v-model:open="addEventModal"
@@ -336,7 +333,6 @@ const isNotToday = computed(() => {
         </span>
       </div>
 
-      <!-- زر عائم أو جانبي يفتح الـ Drawer للشاشات الأصغر من xl -->
       <div class="xl:hidden mt-0 px-4">
         <UButton
           icon="i-lucide-calendar-days"
@@ -349,14 +345,12 @@ const isNotToday = computed(() => {
         </UButton>
       </div>
 
-      <!-- نافذة Drawer للشاشات الصغيرة أقل من xl -->
       <UDrawer
         v-model:open="addEventDrawer"
         title="أحداث اليوم والتحكم بها"
       >
         <template #body>
           <div class="space-y-6">
-            <!-- قسم إضافة حدث داخل الـ Drawer -->
             <div class="p-4 border border-dashed border-primary/40 rounded-2xl bg-primary/5 space-y-3">
               <h3 class="text-sm font-semibold text-primary">
                 اضافة حدث جديد
@@ -386,7 +380,6 @@ const isNotToday = computed(() => {
               </UForm>
             </div>
 
-            <!-- قائمة الأحداث داخل الـ Drawer -->
             <div class="space-y-3">
               <h3 class="text-sm font-semibold text-muted">
                 الأحداث المسجلة في هذا التاريخ:
@@ -427,7 +420,6 @@ const isNotToday = computed(() => {
         </template>
       </UDrawer>
 
-      <!-- نافذة منبثقة لتأكيد الحذف (مشتركة) -->
       <UModal
         v-model:open="deleteConfirmModal"
         title="تأكيد الحذف"
