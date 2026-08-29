@@ -95,6 +95,14 @@ const defaultBookmarks: BookmarkCategory[] = [
     ]
   },
   {
+    category: 'ادوات مساعدة',
+    icon: 'i-lucide-wrench',
+    child: [
+      { label: 'تحميل من اليوتيوب', link: 'https://y2mate.gs/', icon: getFaviconUrl('https://y2mate.gs/') },
+      { label: 'تحويل صيغ الملفات من الجهاز', link: 'https://cloudconvert.com', icon: getFaviconUrl('https://cloudconvert.com') }
+    ]
+  },
+  {
     category: 'التواصل الإجتماعي',
     icon: 'i-lucide-share-2',
     child: [
@@ -102,6 +110,16 @@ const defaultBookmarks: BookmarkCategory[] = [
       { label: 'فيسبوك', link: 'https://facebook.com', icon: getFaviconUrl('https://facebook.com') },
       { label: 'واتساب ويب', link: 'https://web.whatsapp.com/', icon: 'i-simple-icons-whatsapp' },
       { label: 'تليقرام ويب', link: 'https://web.telegram.org/k/', icon: 'i-simple-icons-telegram' }
+    ]
+  },
+  {
+    category: 'خدمات Microsoft',
+    icon: 'i-simple-icons-microsoft',
+    child: [
+      { label: 'مايكروسوفت 365', link: 'https://www.microsoft365.com', icon: getFaviconUrl('https://www.microsoft365.com') },
+      { label: 'ون درايف', link: 'https://onedrive.live.com', icon: getFaviconUrl('https://onedrive.live.com') },
+      { label: 'تيمز', link: 'https://teams.microsoft.com', icon: getFaviconUrl('https://teams.microsoft.com') },
+      { label: 'أوتلوك', link: 'https://outlook.live.com', icon: getFaviconUrl('https://outlook.live.com') }
     ]
   },
   {
@@ -116,16 +134,6 @@ const defaultBookmarks: BookmarkCategory[] = [
       { label: 'مستندات جوجل', link: 'https://docs.google.com', icon: 'i-simple-icons-googledocs' },
       { label: 'يوتيوب', link: 'https://www.youtube.com', icon: getFaviconUrl('https://www.youtube.com') },
       { label: 'جيميل', link: 'https://mail.google.com', icon: 'i-simple-icons-gmail' }
-    ]
-  },
-  {
-    category: 'خدمات Microsoft',
-    icon: 'i-simple-icons-microsoft',
-    child: [
-      { label: 'مايكروسوفت 365', link: 'https://www.microsoft365.com', icon: getFaviconUrl('https://www.microsoft365.com') },
-      { label: 'ون درايف', link: 'https://onedrive.live.com', icon: getFaviconUrl('https://onedrive.live.com') },
-      { label: 'تيمز', link: 'https://teams.microsoft.com', icon: getFaviconUrl('https://teams.microsoft.com') },
-      { label: 'أوتلوك', link: 'https://outlook.live.com', icon: getFaviconUrl('https://outlook.live.com') }
     ]
   },
   {
