@@ -11,6 +11,11 @@ const items = ref<NavigationMenuItem[]>([
     label: 'المهام',
     icon: 'i-lucide-list-todo',
     to: '/todo'
+  },
+  {
+    label: 'الاخبار',
+    icon: 'i-lucide-newspaper',
+    to: '/news'
   }
 ])
 
