@@ -413,7 +413,7 @@ const filteredBookmarks = computed(() => {
               color="error"
               variant="ghost"
               icon="i-lucide-trash-2"
-              class="opacity-100 xl:opacity-0 xl:group-hover:opacity-100 transition-opacity absolute inset-s-auto end-2"
+              class="opacity-100 xl:opacity-0 xl:group-hover:opacity-100 transition-opacity absolute inset-s-auto inset-e-2"
               @click="deleteBookmark(group.category, item.id)"
             />
           </div>

@@ -1,6 +1,7 @@
 <template>
   <div class="space-y-6">
+    <AppAawsatNews />
+    <AppOkazNews />
     <AppAljazeeraNews />
-    <AppWas />
   </div>
 </template>

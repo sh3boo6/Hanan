@@ -2,10 +2,10 @@
 import { XMLParser } from 'fast-xml-parser'
 
 export default defineEventHandler(async (_event) => {
-  const SPA_RSS_URL = 'https://www.spa.gov.sa/rss/sections/1'
+  const OKAZ_RSS_URL = 'https://www.okaz.com.sa/rssFeed/1'
 
   try {
-    const response = await fetch(SPA_RSS_URL, {
+    const response = await fetch(OKAZ_RSS_URL, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
         'Accept': 'application/rss+xml, application/xml, text/xml;q=0.9, */*;q=0.8',
@@ -44,8 +44,8 @@ export default defineEventHandler(async (_event) => {
 
     return {
       success: true,
-      title: channel.title || 'وكالة الأنباء السعودية - واس',
-      description: channel.description || 'أحدث أخبار وكالة الأنباء السعودية',
+      title: channel.title || 'عكاظ',
+      description: channel.description || 'أحدث أخبار عكاظ',
       items: items.map((item: RssItem) => ({
         title: typeof item.title === 'object' && item.title !== null
           ? ('#text' in item.title ? String(item.title['#text'] ?? '') : '')
@@ -60,11 +60,11 @@ export default defineEventHandler(async (_event) => {
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error'
 
-    console.error('SPA RSS Fetch Error:', message)
+    console.error('Okaz RSS Fetch Error:', message)
 
     throw createError({
       statusCode: 500,
-      statusMessage: `Failed to fetch SPA RSS: ${message}`
+      statusMessage: `Failed to fetch Okaz RSS: ${message}`
     })
   }
 })

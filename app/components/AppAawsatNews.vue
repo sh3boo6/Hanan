@@ -1,6 +1,5 @@
-<!-- app.vue -->
 <script setup>
-const { data: newsData, pending, error } = await useFetch('/api/news/was')
+const { data: newsData, pending, error } = await useFetch('/api/news/aawsat')
 </script>
 
 <template>
@@ -13,15 +12,12 @@ const { data: newsData, pending, error } = await useFetch('/api/news/was')
         <div class="flex flex-col gap-1">
           <h1 class="text-2xl flex items-center gap-3 font-bold text-highlighted">
             <img
-              src="https://www.spa.gov.sa/_next/image?url=%2F_next%2Fstatic%2Fmedia%2FLogo_T2.7d0790c5.png&w=256&q=75"
+              src="https://aawsat.com/themes/custom/aawsatv3/assets/img/aawsat-logo.svg"
               class="h-8 object-contain"
-              alt="SPA Logo"
+              alt="الشرق الأوسط Logo"
             >
-            {{ newsData?.title || 'وكالة الأنباء السعودية - واس' }}
+            {{ newsData?.title || 'الشرق الأوسط' }}
           </h1>
-          <p class="text-muted text-sm">
-            {{ newsData?.description }}
-          </p>
         </div>
       </template>
 
@@ -43,7 +39,7 @@ const { data: newsData, pending, error } = await useFetch('/api/news/was')
         color="error"
         variant="subtle"
         title="تنبيه"
-        description="حدث خطأ أثناء جلب الأخبار من واس. يرجى المحاولة لاحقاً."
+        description="حدث خطأ أثناء جلب الأخبار من الشرق الأوسط. يرجى المحاولة لاحقاً."
         icon="i-lucide-alert-circle"
       />
 
@@ -67,13 +63,24 @@ const { data: newsData, pending, error } = await useFetch('/api/news/was')
               {{ item.title }}
             </ULink>
 
-            <UBadge
-              variant="subtle"
-              size="xs"
-              class="w-fit"
-            >
-              {{ new Date(item.pubDate).toLocaleDateString('ar-SA') }}
-            </UBadge>
+            <div class="flex flex-wrap items-center gap-2">
+              <UBadge
+                variant="subtle"
+                size="xs"
+                class="w-fit"
+              >
+                {{ new Date(item.pubDate).toLocaleDateString('ar-SA') }}
+              </UBadge>
+              <UBadge
+                v-for="cat in item.categories"
+                :key="cat"
+                variant="outline"
+                size="xs"
+                class="w-fit"
+              >
+                {{ cat }}
+              </UBadge>
+            </div>
 
             <p class="text-muted text-sm leading-relaxed">
               {{ item.contentSnippet }}
