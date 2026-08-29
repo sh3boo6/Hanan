@@ -13,6 +13,9 @@ const items = ref<NavigationMenuItem[]>([
     to: '/todo'
   }
 ])
+
+// حالة التحكم بفتح وإغلاق السلايدوفر برمجياً
+const isSlideoverOpen = ref(false)
 </script>
 
 <template>
@@ -35,7 +38,10 @@ const items = ref<NavigationMenuItem[]>([
           <div class="flex items-center gap-3">
             <AppSearch class="hidden xl:flex" />
             <UColorModeButton />
+
+            <!-- استخدام v-model:open للتحكم الكامل بالحالة -->
             <USlideover
+              v-model:open="isSlideoverOpen"
               title="القائمة الجانبية"
               description="تحتوي على الروابط والتقويم ومنشئ رمز الاستجابة السريعة"
               side="left"
@@ -50,12 +56,14 @@ const items = ref<NavigationMenuItem[]>([
                 <AppSearch class="flex mb-1 -top-2 xl:hidden" />
                 <div class="flex border-b border-default pb-1">
                   <div class="border-e border-default pe-2 me-3 flex justify-start">
+                    <!-- عند الضغط على أي عنصر في القائمة، نقوم بإغلاق السلايدوفر فوراً -->
                     <UNavigationMenu
                       :items="items"
                       popover
                       collapsed
                       orientation="vertical"
                       class="xl:hidden"
+                      @click="isSlideoverOpen = false"
                     />
                   </div>
                   <ClientOnly>
