@@ -28,7 +28,7 @@ const isSlideoverOpen = ref(false)
     <!-- Main Content Wrapper -->
     <div class="flex-1 flex flex-col min-w-0">
       <!-- Header -->
-      <header class="h-20 flex items-center px-8 bg-accented/20 border-b border-default shrink-0">
+      <header class="h-20 flex items-center px-8 bg-default xl:bg-accented/20 border-b border-default shrink-0">
         <div class="flex items-center justify-between w-full">
           <ULink to="/">
             <AppLogo class="h-14" />
