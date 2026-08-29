@@ -6,7 +6,7 @@
       </ClientOnly>
       <AppPrayer />
       <AppClock
-        class="w-22 h-22 border rounded-full border-primary/50 relative -top-1.5"
+        class="min-w-22 min-h-22 border rounded-full border-primary/50 relative -top-1.5"
       />
     </div>
   </div>
