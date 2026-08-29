@@ -11,6 +11,8 @@ useHead({
   }
 })
 
+const toaster = { position: 'top-right' }
+
 const title = 'دليل حنان'
 const description = 'صفحة ويب تساعد المستخدم على الوصول للمواقع التي تهم المعلم او الإداري ويوجد بها خدمات تسهّل على الموظف متابعة المهام والأحداث والفعاليات'
 
@@ -25,7 +27,10 @@ useSeoMeta({
 </script>
 
 <template>
-  <UApp :locale="ar">
+  <UApp
+    :locale="ar"
+    :toaster="toaster"
+  >
     <NuxtLayout />
   </UApp>
 </template>

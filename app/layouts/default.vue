@@ -74,7 +74,8 @@ const items = ref<NavigationMenuItem[]>([
 
       <!-- Footer -->
       <footer class="h-14 flex text-sm items-center justify-center xl:justify-end text-muted px-6 xl:px-10 border-t border-default shrink-0">
-        جميع الحقوق محفوظة - <AppName class="font-semibold" /> {{ new Date().getFullYear() }} &copy; - هذه النسخه تجريبية | الاصدار 1.0.0
+        جميع الحقوق محفوظة - <AppName class="font-semibold" /> {{ new Date().getFullYear() }} &copy;
+        <span class="hidden xl:inline">- هذه النسخه تجريبية | الاصدار 1.0.0</span>
         <AppLogo class="h-8 inline ms-1" />
       </footer>
     </div>

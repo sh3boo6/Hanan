@@ -55,9 +55,9 @@ export default defineNuxtConfig({
 
   pwa: {
     manifest: {
-      name: 'My App',
-      short_name: 'App',
-      description: 'My awesome Nuxt app',
+      name: 'دليل حنان',
+      short_name: 'دليل حنان',
+      description: 'صفحة ويب تساعد المستخدم على الوصول للمواقع التي تهم المعلم او الإداري ويوجد بها خدمات تسهّل على الموظف متابعة المهام والأحداث والفعاليات',
       theme_color: '#ffffff',
       background_color: '#ffffff',
       icons: [
