@@ -36,7 +36,7 @@ const isSlideoverOpen = ref(false)
             <AppWeather />
           </ClientOnly>
           <div class="flex items-center gap-3">
-            <AppSearch class="hidden xl:flex" />
+            <AppSearch class="hidden md:flex" />
             <UColorModeButton />
 
             <!-- استخدام v-model:open للتحكم الكامل بالحالة -->
@@ -53,7 +53,6 @@ const isSlideoverOpen = ref(false)
                 variant="ghost"
               />
               <template #body>
-                <AppSearch class="flex mb-1 -top-2 xl:hidden" />
                 <div class="flex border-b border-default pb-1">
                   <div class="border-e border-default pe-2 me-3 flex justify-start">
                     <!-- عند الضغط على أي عنصر في القائمة، نقوم بإغلاق السلايدوفر فوراً -->
