@@ -193,7 +193,7 @@ const copyToClipboard = async () => {
           size="sm"
           variant="outline"
           color="neutral"
-          class="w-full justify-center"
+          class="w-full justify-center hidden xl:flex"
           :disabled="!qrDataUrl"
           @click="saveQrImage"
         />
