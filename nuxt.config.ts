@@ -4,7 +4,7 @@ const app = {
   description: 'صفحة ويب تساعد المستخدم على الوصول للمواقع التي تهم المعلم او الإداري ويوجد بها خدمات تسهّل على الموظف متابعة المهام والأحداث والفعاليات'
 }
 export default defineNuxtConfig({
-  modules: ['@nuxt/eslint', '@nuxt/ui', '@vite-pwa/nuxt', '@nuxt/fonts', '@nuxt/image'],
+  modules: ['@nuxt/eslint', '@nuxt/ui', '@vite-pwa/nuxt', '@nuxt/fonts', '@nuxt/image', 'nuxt-security'],
 
   devtools: {
     enabled: true
