@@ -90,7 +90,7 @@ export default defineNuxtConfig({
 
   security: {
     contentSecurityPolicy: {
-      imgSrc: ['\'self\'', 'https://aawsat.com', 'https://okaz.com']
+      imgSrc: ['\'self\'', 'https://aawsat.com', 'https://okaz.com', 'https://www.google.com']
     }
   }
 })
