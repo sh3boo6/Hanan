@@ -386,6 +386,8 @@ const filteredBookmarks = computed(() => {
                 v-if="item.icon && item.icon.startsWith('http')"
                 :src="item.icon"
                 alt="favicon"
+                width="16"
+                height="16"
                 class="w-4 h-4 shrink-0 rounded-sm object-contain"
                 @error="(e: Event) => {
                   const target = e.target as HTMLElement;

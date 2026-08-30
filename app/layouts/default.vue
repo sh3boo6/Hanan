@@ -38,12 +38,12 @@ const isSlideoverOpen = ref(false)
             class="hidden xl:flex"
           />
           <ClientOnly>
-            <AppWeather />
+            <LazyAppWeather />
           </ClientOnly>
           <div class="flex items-center gap-3">
             <AppSearch class="hidden md:flex" />
+            <LazyAppShare />
             <UColorModeButton />
-
             <!-- استخدام v-model:open للتحكم الكامل بالحالة -->
             <USlideover
               v-model:open="isSlideoverOpen"
@@ -71,10 +71,10 @@ const isSlideoverOpen = ref(false)
                     />
                   </div>
                   <ClientOnly>
-                    <AppCalendar />
+                    <LazyAppCalendar />
                   </ClientOnly>
                 </div>
-                <AppQR class="mt-2" />
+                <LazyAppQR class="mt-2" />
               </template>
             </USlideover>
           </div>
@@ -101,7 +101,7 @@ const isSlideoverOpen = ref(false)
             <AppName class="font-semibold" /> {{ new Date().getFullYear() }} &copy;
           </span>
           <span class="hidden xl:inline text-xs opacity-75">| هذه النسخة تجريبية - الإصدار 1.0.0</span>
-          <AppLogo class="h-6 inline ms-0.5 align-middle" />
+          <AppLogo class="w-8 inline ms-0.5 align-middle" />
         </div>
       </footer>
     </div>
@@ -110,13 +110,13 @@ const isSlideoverOpen = ref(false)
     <aside class="hidden xl:flex w-80 flex-col bg-accented/20 border-s border-default shrink-0">
       <div class="flex-1 p-4 flex flex-col">
         <ClientOnly>
-          <AppCalendar />
+          <LazyAppCalendar />
         </ClientOnly>
       </div>
       <USeparator type="dashed" />
       <div class="flex-1 p-4">
         <!-- Secondary Sidebar Content -->
-        <AppQR />
+        <LazyAppQR />
       </div>
     </aside>
   </div>

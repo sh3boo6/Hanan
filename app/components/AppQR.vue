@@ -164,6 +164,8 @@ const copyToClipboard = async () => {
             v-if="qrDataUrl"
             :src="qrDataUrl"
             alt="QR Code"
+            width="300"
+            height="300"
             class="h-full object-contain"
           >
           <div

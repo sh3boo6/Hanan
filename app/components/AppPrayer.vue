@@ -5,7 +5,7 @@
       class="flex items-center justify-center h-full"
     >
       <UIcon
-        name="i-heroicons-arrow-path"
+        name="i-lucide-loader-2"
         class="w-5 h-5 animate-spin text-default"
       />
     </div>
@@ -107,20 +107,57 @@ const fetchTimingsByCoords = (latitude, longitude) => {
 }
 
 const getUserLocation = () => {
-  if (navigator.geolocation) {
+  if (!navigator.geolocation) {
+    fetchTimingsByCoords(19.8814, 41.3788)
+    return
+  }
+
+  if (navigator.permissions?.query) {
+    navigator.permissions.query({ name: 'geolocation' }).then((result) => {
+      if (result.state === 'granted') {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            fetchTimingsByCoords(position.coords.latitude, position.coords.longitude)
+          },
+          () => {
+            fetchTimingsByCoords(19.8814, 41.3788)
+          },
+          { timeout: 10000 }
+        )
+      } else if (result.state === 'prompt') {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            fetchTimingsByCoords(position.coords.latitude, position.coords.longitude)
+          },
+          () => {
+            fetchTimingsByCoords(19.8814, 41.3788)
+          },
+          { timeout: 10000 }
+        )
+      } else {
+        fetchTimingsByCoords(19.8814, 41.3788)
+      }
+    }).catch(() => {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          fetchTimingsByCoords(position.coords.latitude, position.coords.longitude)
+        },
+        () => {
+          fetchTimingsByCoords(19.8814, 41.3788)
+        },
+        { timeout: 10000 }
+      )
+    })
+  } else {
     navigator.geolocation.getCurrentPosition(
       (position) => {
         fetchTimingsByCoords(position.coords.latitude, position.coords.longitude)
       },
       () => {
-        // إحداثيات مدينة المخواة كقيمة افتراضية في حال رفض المستخدم مشاركة الموقع
-        // إحداثيات المخواة تقريبا: Lat: 19.88, Lng: 41.38
         fetchTimingsByCoords(19.8814, 41.3788)
       },
       { timeout: 10000 }
     )
-  } else {
-    fetchTimingsByCoords(19.8814, 41.3788)
   }
 }
 

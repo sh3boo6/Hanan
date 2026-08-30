@@ -1,6 +1,10 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+const app = {
+  name: 'دليل حنان',
+  description: 'صفحة ويب تساعد المستخدم على الوصول للمواقع التي تهم المعلم او الإداري ويوجد بها خدمات تسهّل على الموظف متابعة المهام والأحداث والفعاليات'
+}
 export default defineNuxtConfig({
-  modules: ['@nuxt/eslint', '@nuxt/ui', '@vite-pwa/nuxt'],
+  modules: ['@nuxt/eslint', '@nuxt/ui', '@vite-pwa/nuxt', '@nuxt/fonts', '@nuxt/image'],
 
   devtools: {
     enabled: true
@@ -8,7 +12,7 @@ export default defineNuxtConfig({
 
   app: {
     head: {
-      viewport: 'width=device-width, initial-scale=1.5, maximum-scale=1.5, user-scalable=no',
+      viewport: 'width=device-width, initial-scale=1.0',
       link: [
         { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
         { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: 'anonymous' },
@@ -27,6 +31,13 @@ export default defineNuxtConfig({
   },
 
   css: ['~/assets/css/main.css'],
+
+  runtimeConfig: {
+    public: {
+      appName: app.name,
+      appDescription: app.description
+    }
+  },
 
   routeRules: {
     '/': { prerender: true }
@@ -55,9 +66,9 @@ export default defineNuxtConfig({
 
   pwa: {
     manifest: {
-      name: 'دليل حنان',
-      short_name: 'دليل حنان',
-      description: 'صفحة ويب تساعد المستخدم على الوصول للمواقع التي تهم المعلم او الإداري ويوجد بها خدمات تسهّل على الموظف متابعة المهام والأحداث والفعاليات',
+      name: app.name,
+      short_name: app.name,
+      description: app.description,
       theme_color: '#ffffff',
       background_color: '#ffffff',
       icons: [

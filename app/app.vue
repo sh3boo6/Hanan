@@ -1,9 +1,11 @@
 <script setup>
 import { ar } from '@nuxt/ui/locale'
 
+const config = useRuntimeConfig()
+
 useHead({
   meta: [
-    { name: 'viewport', content: 'width=device-width, initial-scale=1' }
+    { name: 'viewport', content: 'width=device-width, initial-scale=1.0' }
   ],
   htmlAttrs: {
     lang: ar.code,
@@ -13,8 +15,8 @@ useHead({
 
 const toaster = { position: 'top-right' }
 
-const title = 'دليل حنان'
-const description = 'صفحة ويب تساعد المستخدم على الوصول للمواقع التي تهم المعلم او الإداري ويوجد بها خدمات تسهّل على الموظف متابعة المهام والأحداث والفعاليات'
+const title = config.public.appName
+const description = config.public.appName
 
 useSeoMeta({
   title,
@@ -31,6 +33,12 @@ useSeoMeta({
     :locale="ar"
     :toaster="toaster"
   >
+    <NuxtLoadingIndicator
+      color="var(--ui-primary)"
+      error-color="var(--ui-error)"
+      :height="3"
+    />
     <NuxtLayout />
+    <ScrollToTop />
   </UApp>
 </template>
