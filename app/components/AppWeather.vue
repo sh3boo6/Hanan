@@ -90,7 +90,7 @@ watchEffect(() => {
 <template>
   <div class="flex items-center gap-1">
     <div class="flex items-end gap-1">
-      <span class="font-bold text-secondary text-xs">
+      <span class="hidden font-bold text-secondary text-xs">
         {{ cityName }}
       </span>
       <UIcon
