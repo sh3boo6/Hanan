@@ -108,13 +108,13 @@ const isSlideoverOpen = ref(false)
 
     <!-- Desktop Right Sidebar -->
     <aside class="hidden xl:flex w-80 flex-col bg-accented/20 border-s border-default shrink-0">
-      <div class="flex-1 p-4 flex flex-col">
+      <div class="flex-1 p-4 pb-1 flex flex-col">
         <ClientOnly>
           <LazyAppCalendar />
         </ClientOnly>
       </div>
       <USeparator type="dashed" />
-      <div class="flex-1 p-4">
+      <div class="flex-1 p-4 pt-1">
         <!-- Secondary Sidebar Content -->
         <LazyAppQR />
       </div>

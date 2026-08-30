@@ -201,7 +201,7 @@ const isNotToday = computed(() => {
 
 <template>
   <div class="flex-1 flex flex-col">
-    <div class="flex items-center gap-1 mb-3 border-b border-b-default border-b-dashed pb-3 h-16">
+    <div class="flex items-center gap-1 mb-3 border-b border-b-default border-b-dashed pb-3 h-8 xl:h-16">
       <UButton
         size="md"
         :color="isNotToday ? 'primary' : 'neutral'"
@@ -262,7 +262,7 @@ const isNotToday = computed(() => {
         <span>{{ currentDescription }}</span>
       </div>
 
-      <div class="hidden xl:flex border border-dashed text-primary font-semibold border-primary/40 rounded-2xl bg-primary/5 mt-auto flex-col justify-center px-4 py-2 text-sm gap-3">
+      <div class="hidden border border-dashed text-primary font-semibold border-primary/40 rounded-2xl bg-primary/5 mt-auto flex-col justify-center px-4 py-2 text-sm gap-3">
         <UModal
           v-model:open="addEventModal"
           title="اضافة حدث"
@@ -333,7 +333,7 @@ const isNotToday = computed(() => {
         </span>
       </div>
 
-      <div class="xl:hidden mt-0 px-4">
+      <div class="mt-0 px-4">
         <UButton
           icon="i-lucide-calendar-days"
           color="primary"
