@@ -86,5 +86,11 @@ export default defineNuxtConfig({
     devOptions: {
       enabled: false
     }
+  },
+
+  security: {
+    contentSecurityPolicy: {
+      imgSrc: ['\'self\'', 'https://aawsat.com', 'https://okaz.com']
+    }
   }
 })
