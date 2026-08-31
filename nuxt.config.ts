@@ -4,7 +4,7 @@ const app = {
   description: 'صفحة ويب تساعد المستخدم على الوصول للمواقع التي تهم المعلم او الإداري ويوجد بها خدمات تسهّل على الموظف متابعة المهام والأحداث والفعاليات'
 }
 export default defineNuxtConfig({
-  modules: ['@nuxt/eslint', '@nuxt/ui', '@vite-pwa/nuxt', '@nuxt/fonts', '@nuxt/image'],
+  modules: ['@nuxt/eslint', '@nuxt/ui', '@vite-pwa/nuxt', '@nuxt/fonts', '@nuxt/image', '@nuxtjs/sitemap'],
 
   devtools: {
     enabled: true
@@ -13,6 +13,9 @@ export default defineNuxtConfig({
   app: {
     head: {
       viewport: 'width=device-width, initial-scale=1.0',
+      meta: [
+        { name: 'google-site-verification', content: 'dXG2EaowalmjF3ako0fzYzbkB_xnX8Nej7il2NDwy2M' }
+      ],
       link: [
         { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
         { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: 'anonymous' },
@@ -31,6 +34,11 @@ export default defineNuxtConfig({
   },
 
   css: ['~/assets/css/main.css'],
+
+  site: {
+    url: 'https://hanan-azure.vercel.app',
+    name: app.name
+  },
 
   runtimeConfig: {
     public: {
