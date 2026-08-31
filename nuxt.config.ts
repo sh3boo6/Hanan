@@ -14,7 +14,8 @@ export default defineNuxtConfig({
     head: {
       viewport: 'width=device-width, initial-scale=1.0',
       meta: [
-        { name: 'google-site-verification', content: 'dXG2EaowalmjF3ako0fzYzbkB_xnX8Nej7il2NDwy2M' }
+        { name: 'google-site-verification', content: 'dXG2EaowalmjF3ako0fzYzbkB_xnX8Nej7il2NDwy2M' },
+        { name: 'google-site-verification', content: 'rZMiR7hgwLEdwcvGNrTI8UUpbHMxfaJoRvUvRzWNjqk' }
       ],
       link: [
         { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
