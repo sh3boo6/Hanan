@@ -1,15 +1,20 @@
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref } from 'vue'
 import * as z from 'zod'
 import type { FormSubmitEvent } from '@nuxt/ui'
 import QRCode from 'qrcode'
 import jsQR from 'jsqr'
+import { useQrSharedState } from '~/composables/useSharedState'
 
 const toast = useToast()
 
-const qrData = ref<string | null>(null)
-const qrDataUrl = ref<string | null>(null)
-const generateModal = ref(false)
+// Shared state across desktop and mobile QR instances
+const {
+  data: qrData,
+  dataUrl: qrDataUrl,
+  generateModal,
+  text
+} = useQrSharedState()
 
 const schema = z.object({
   text: z.string().min(1, 'يجب إدخال نص أو رابط لإنشاء الرمز')
@@ -18,17 +23,28 @@ const schema = z.object({
 type Schema = z.output<typeof schema>
 
 const state = reactive<Partial<Schema>>({
-  text: undefined
+  text: text.value
 })
+
+watch(text, (newText) => {
+  state.text = newText
+})
+
+watch(
+  () => state.text,
+  (newText) => {
+    text.value = newText ?? ''
+  }
+)
 
 async function onGenerate(event: FormSubmitEvent<Schema>) {
   try {
-    const text = event.data.text
-    const url = await QRCode.toDataURL(text, { width: 300, margin: 2 })
-    qrData.value = text
+    const inputText = event.data.text
+    const url = await QRCode.toDataURL(inputText, { width: 300, margin: 2 })
+    qrData.value = inputText
     qrDataUrl.value = url
     generateModal.value = false
-    state.text = ''
+    text.value = ''
     toast.add({ title: 'نجاح', description: 'تم إنشاء الرمز بنجاح.', color: 'success' })
   } catch (err) {
     console.error(err)

@@ -11,6 +11,12 @@ import {
 import type { DateValue } from '@internationalized/date'
 import * as z from 'zod'
 import type { FormSubmitEvent } from '@nuxt/ui'
+import type { CustomCalendarEvent } from '~/composables/useSharedState'
+
+import { useCalendarSharedState } from '~/composables/useSharedState'
+import { useCalendarEvents } from '~/composables/useCalendarEvents'
+
+const toast = useToast()
 
 const schema = z.object({
   title: z.string('يجب كتابة العنوان').min(5, 'الحد الإدنى ٥ أحرف')
@@ -18,50 +24,31 @@ const schema = z.object({
 
 type Schema = z.output<typeof schema>
 
-const state = reactive<Partial<Schema>>({
-  title: undefined
-})
+// Shared state across desktop and mobile calendar instances
+const {
+  events: localEvents,
+  addEventModal,
+  addEventDrawer,
+  deleteConfirmModal,
+  eventToDeleteId,
+  activeCalendarId,
+  formState
+} = useCalendarSharedState()
 
-const addEventModal = ref(false)
-const addEventDrawer = ref(false)
-const toast = useToast()
-
-const deleteConfirmModal = ref(false)
-const eventToDeleteId = ref<string | null>(null)
-
-interface CustomEvent {
-  id: string
-  title: string
-  date: { year: number, month: number, day: number }
-  type: string
-}
-
-const localEvents = ref<CustomEvent[]>([])
-
-onMounted(() => {
-  const saved = localStorage.getItem('custom_calendar_events')
-  if (saved) {
-    try {
-      localEvents.value = JSON.parse(saved)
-    } catch (e) {
-      console.error(e)
-    }
-  }
-})
+const { getEventsForDate } = useCalendarEvents()
 
 const saveToLocalStorage = () => {
   localStorage.setItem('custom_calendar_events', JSON.stringify(localEvents.value))
 }
 
 async function onSubmit(_event: FormSubmitEvent<Schema>) {
-  if (!state.title) return
+  if (!formState.value.title) return
 
-  // توحيد حفظ التاريخ بتحويله إلى التقويم الميلادي دائماً لضمان توافقه بين التقويمين
   const gregorianDate = toCalendar(calendarValue.value, new GregorianCalendar())
 
-  const newCustomEvent: CustomEvent = {
+  const newCustomEvent: CustomCalendarEvent = {
     id: Date.now().toString(),
-    title: state.title,
+    title: formState.value.title,
     date: { year: gregorianDate.year, month: gregorianDate.month, day: gregorianDate.day },
     type: 'once'
   }
@@ -70,7 +57,7 @@ async function onSubmit(_event: FormSubmitEvent<Schema>) {
   saveToLocalStorage()
 
   toast.add({ title: 'نجاح', description: 'تم اضافة الحدث بنجاح.', color: 'success' })
-  state.title = ''
+  formState.value.title = ''
   addEventModal.value = false
   addEventDrawer.value = false
 }
@@ -89,8 +76,6 @@ const confirmDeleteEvent = () => {
   deleteConfirmModal.value = false
   eventToDeleteId.value = null
 }
-
-const { getEventsForDate } = useCalendarEvents()
 
 // دالة مساعدة لتوحيد ومقارنة التواريخ بغض النظر عن التقويم المعروض
 const isSameDay = (d1: { year: number, month: number, day: number }, d2: DateValue) => {
@@ -129,8 +114,6 @@ const calendarOptions = [
     locale: 'ar-SA-u-ca-islamic-tbla'
   }
 ] as const
-
-const activeCalendarId = ref<'gregorian' | 'umalqura' | 'tabular'>('umalqura')
 
 const activeConfig = computed(() => {
   return calendarOptions.find(c => c.id === activeCalendarId.value) ?? calendarOptions[1]
@@ -277,7 +260,7 @@ const isNotToday = computed(() => {
           <template #body>
             <UForm
               :schema="schema"
-              :state="state"
+              :state="formState"
               class="space-y-4"
               @submit="onSubmit"
             >
@@ -286,7 +269,7 @@ const isNotToday = computed(() => {
                 name="title"
               >
                 <UInput
-                  v-model="state.title"
+                  v-model="formState.title"
                   class="block"
                 />
               </UFormField>
@@ -357,7 +340,7 @@ const isNotToday = computed(() => {
               </h3>
               <UForm
                 :schema="schema"
-                :state="state"
+                :state="formState"
                 class="space-y-3"
                 @submit="onSubmit"
               >
@@ -366,7 +349,7 @@ const isNotToday = computed(() => {
                   name="title"
                 >
                   <UInput
-                    v-model="state.title"
+                    v-model="formState.title"
                     class="block w-full"
                   />
                 </UFormField>
