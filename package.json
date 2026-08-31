@@ -16,6 +16,7 @@
     "@internationalized/date": "^3.12.3",
     "@nuxt/image": "2.1.0",
     "@nuxt/ui": "^4.11.0",
+    "@nuxtjs/sitemap": "8.5.0",
     "@vite-pwa/nuxt": "1.1.1",
     "@vueuse/core": "^14.4.0",
     "fast-xml-parser": "^5.11.1",
