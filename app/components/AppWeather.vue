@@ -66,12 +66,13 @@
           dir="rtl"
           class="p-4 space-y-4 w-80"
         >
-          <div class="flex justify-end">
+          <div class="flex flex-col gap-2 justify-end">
             <UButton
               color="neutral"
               variant="ghost"
               size="xs"
               icon="i-heroicons-x-mark-20-solid"
+              class="self-end"
               @click="isOpen = false"
             />
 
