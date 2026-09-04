@@ -1,0 +1,59 @@
+{
+  "name": "Hanan",
+  "description": "دليل حنان - صفحة ويب帮助 المستخدم على الوصول للمواقع التي تهم المعلم او الإداري",
+  "commands": [
+    "dev",
+    "build",
+    "lint",
+    "typecheck"
+  ],
+  "agents": [],
+  "permissions": {
+    "bash": {
+      "allowed": [
+        "git status",
+        "git diff",
+        "git log",
+        "git add",
+        "git commit",
+        "git push",
+        "git pull",
+        "git branch",
+        "git checkout",
+        "git restore",
+        "git reset",
+        "git merge",
+        "git rebase",
+        "git stash",
+        "git tag",
+        "git remote",
+        "git fetch",
+        "git show",
+        "git blame",
+        "git grep",
+        "git ls-files",
+        "git mv",
+        "git rm",
+        "git copy",
+        "git amend",
+        "git revert",
+        "git cherry-pick",
+        "npm run dev",
+        "npm run build",
+        "npm run lint",
+        "npm run typecheck",
+        "npm run preview",
+        "pnpm run dev",
+        "pnpm run build",
+        "pnpm run lint",
+        "pnpm run typecheck",
+        "pnpm run preview",
+        "nuxt dev",
+        "nuxt build",
+        "nuxt preview",
+        "nuxt prepare",
+        "nuxt typecheck"
+      ]
+    }
+  }
+}
