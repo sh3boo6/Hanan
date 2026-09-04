@@ -3,14 +3,13 @@
     dir="rtl"
     class="inline-flex items-center gap-2"
   >
-    <!-- بطاقة التنبيه المصغرة للـ Header -->
+    <!-- بطاقة التنبيه عند تعطيل الموقع -->
     <div
       v-if="!isGeolocationEnabled"
       class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-amber-500/40 bg-amber-50/80 dark:bg-amber-950/40 text-amber-800 dark:text-amber-200 text-xs"
     >
       <UIcon
         name="i-heroicons-exclamation-triangle-20-solid"
-        color="warning"
         class="size-4 shrink-0 text-amber-500"
       />
       <span>تحديد الموقع معطل</span>
@@ -24,171 +23,292 @@
       />
     </div>
 
-    <!-- بطاقة الطقس الأفقية للملف الشخصي/الهيدر (Inline Header Card) -->
-    <UCard
+    <!-- بطاقة الطقس الأفقية -->
+    <UPopover
       v-else
-      class="group cursor-pointer transition-all duration-200 hover:border-primary-500/50"
-      :ui="{ body: 'px-3 py-1.5 sm:px-3 sm:py-1.5' }"
-      @click="isOpen = true"
+      :open="isOpen"
     >
-      <div class="flex items-center gap-3">
-        <!-- الأيقونة ودرجة الحرارة -->
-        <div class="flex items-center gap-1.5">
-          <UIcon
-            :name="weather.icon"
-            class="size-5 text-primary-500 transition-transform group-hover:scale-110"
-          />
-          <span class="text-sm font-extrabold text-gray-900 dark:text-white leading-none">
-            {{ weather.temp }}°
-          </span>
-        </div>
+      <UCard
+        class="group cursor-pointer transition-all duration-200 hover:border-primary-500/50"
+        :ui="{ body: 'px-3 py-1.5 sm:px-3 sm:py-1.5' }"
+        @click="isOpen = !isOpen"
+      >
+        <div class="flex items-center gap-3">
+          <div class="flex items-center gap-1.5">
+            <UIcon
+              :name="currentWeatherIcon"
+              class="size-5 text-primary-500 transition-transform group-hover:scale-110"
+            />
+            <span class="text-sm font-extrabold text-gray-900 dark:text-white leading-none">
+              {{ currentTemp }}°
+            </span>
+          </div>
 
-        <!-- معلومات المدينة والحالة -->
-        <div class="flex items-center gap-1.5 text-xs">
-          <span class="font-bold text-gray-800 dark:text-gray-200">
-            {{ weather.city }}
-          </span>
-          <span class="text-gray-400 dark:text-gray-500">•</span>
-          <span class="text-gray-500 dark:text-gray-400 hidden sm:inline">
-            {{ weather.condition }}
-          </span>
-        </div>
+          <div class="flex items-center gap-1.5 text-xs">
+            <span class="font-bold text-gray-800 dark:text-gray-200">
+              {{ weatherData?.city || 'جاري التحميل...' }}
+            </span>
+            <span class="text-gray-400 dark:text-gray-500">•</span>
+            <span class="text-gray-500 dark:text-gray-400 hidden sm:inline">
+              {{ currentCondition }}
+            </span>
+          </div>
 
-        <!-- إحصائيات سريعة مختصرة -->
-        <div class="hidden 2xl:flex items-center gap-3 text-[11px] text-gray-500 dark:text-gray-400 border-r border-gray-200 dark:border-gray-700 pr-3">
-          <span>💧 ٪{{ weather.humidity }}</span>
-          <span>💨 {{ weather.windSpeed }} كم/س</span>
+          <div class="hidden 2xl:flex items-center gap-3 text-[11px] text-gray-500 dark:text-gray-400 border-r border-gray-200 dark:border-gray-700 pr-3">
+            <span>💧 ٪{{ weatherData?.current.relative_humidity_2m ?? '--' }}</span>
+            <span>💨 {{ weatherData?.current.wind_speed_10m ?? '--' }} كم/س</span>
+          </div>
         </div>
-      </div>
-    </UCard>
+      </UCard>
 
-    <!-- Modal التفاصيل كما هو عند النقر -->
-    <UModal
-      v-model:open="isOpen"
-      :title="`تفاصيل الطقس في ${weather.city}`"
-    >
       <template #content>
         <div
           dir="rtl"
-          class="p-6 space-y-6"
+          class="p-4 space-y-4 w-80"
         >
-          <div class="flex items-center justify-between bg-primary-50 dark:bg-primary-950/40 p-4 rounded-xl border border-primary-200/50 dark:border-primary-800/50">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-gray-900 dark:text-white">بحث عن مدينة</span>
+            <UButton
+              color="neutral"
+              variant="ghost"
+              size="xs"
+              icon="i-heroicons-x-mark-20-solid"
+              @click="isOpen = false"
+            />
+          </div>
+
+          <USelect
+            v-model="selectedCity"
+            :options="cityOptions"
+            searchable
+            placeholder="ابحث عن مدينة..."
+            class="w-full"
+            size="xs"
+            @update:model-value="onCityChange"
+          />
+
+          <div class="flex items-center justify-between bg-primary-50 dark:bg-primary-950/40 p-3 rounded-xl border border-primary-200/50 dark:border-primary-800/50">
             <div>
               <p class="text-xs font-semibold text-primary-600 dark:text-primary-400">
                 الحالة الحالية
               </p>
-              <h2 class="text-2xl font-black text-gray-900 dark:text-white">
-                {{ weather.temp }}°م
+              <h2 class="text-xl font-black text-gray-900 dark:text-white">
+                {{ currentTemp }}°م
               </h2>
-              <p class="text-sm text-gray-600 dark:text-gray-300">
-                تُشعر وكأنها {{ weather.feelsLike }}°م • {{ weather.condition }}
+              <p class="text-xs text-gray-600 dark:text-gray-300">
+                تُشعر وكأنها {{ feelsLike }}°م • {{ currentCondition }}
+              </p>
+              <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">
+                {{ weatherData?.city }}
               </p>
             </div>
             <UIcon
-              :name="weather.icon"
-              class="size-16 text-primary-500"
+              :name="currentWeatherIcon"
+              class="size-10 text-primary-500"
             />
           </div>
 
-          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            <div
-              v-for="metric in metrics"
-              :key="metric.label"
-              class="bg-gray-50 dark:bg-gray-900/50 p-3 rounded-lg border border-gray-100 dark:border-gray-800"
-            >
-              <div class="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-xs mb-1">
+          <div class="grid grid-cols-2 gap-2">
+            <div class="bg-gray-50 dark:bg-gray-900/50 p-2 rounded-lg border border-gray-100 dark:border-gray-800">
+              <div class="flex items-center gap-1.5 text-gray-500 dark:text-gray-400 text-[11px] mb-1">
                 <UIcon
-                  :name="metric.icon"
-                  class="size-4 text-primary-500"
+                  name="i-heroicons-swatch"
+                  class="size-3.5 text-primary-500"
                 />
-                <span>{{ metric.label }}</span>
+                <span>الرطوبة</span>
               </div>
-              <p class="text-base font-bold text-gray-900 dark:text-white">
-                {{ metric.value }}
+              <p class="text-sm font-bold text-gray-900 dark:text-white">
+                ٪{{ weatherData?.current.relative_humidity_2m ?? '--' }}
+              </p>
+            </div>
+
+            <div class="bg-gray-50 dark:bg-gray-900/50 p-2 rounded-lg border border-gray-100 dark:border-gray-800">
+              <div class="flex items-center gap-1.5 text-gray-500 dark:text-gray-400 text-[11px] mb-1">
+                <UIcon
+                  name="i-heroicons-arrow-path-20-solid"
+                  class="size-3.5 text-primary-500"
+                />
+                <span>الرياح</span>
+              </div>
+              <p class="text-sm font-bold text-gray-900 dark:text-white">
+                {{ weatherData?.current.wind_speed_10m ?? '--' }} كم/س
+              </p>
+            </div>
+
+            <div class="bg-gray-50 dark:bg-gray-900/50 p-2 rounded-lg border border-gray-100 dark:border-gray-800">
+              <div class="flex items-center gap-1.5 text-gray-500 dark:text-gray-400 text-[11px] mb-1">
+                <UIcon
+                  name="i-heroicons-variable"
+                  class="size-3.5 text-primary-500"
+                />
+                <span>الضغط</span>
+              </div>
+              <p class="text-sm font-bold text-gray-900 dark:text-white">
+                {{ weatherData?.current.surface_pressure ? Math.round(weatherData.current.surface_pressure) : '--' }} هكتو
+              </p>
+            </div>
+
+            <div class="bg-gray-50 dark:bg-gray-900/50 p-2 rounded-lg border border-gray-100 dark:border-gray-800">
+              <div class="flex items-center gap-1.5 text-gray-500 dark:text-gray-400 text-[11px] mb-1">
+                <UIcon
+                  name="i-heroicons-sparkles"
+                  class="size-3.5 text-primary-500"
+                />
+                <span>UV</span>
+              </div>
+              <p class="text-sm font-bold text-gray-900 dark:text-white">
+                {{ weatherData?.daily.uv_index_max[0] ? weatherData.daily.uv_index_max[0].toFixed(1) : '--' }}
               </p>
             </div>
           </div>
 
           <div>
-            <h4 class="text-sm font-bold text-gray-900 dark:text-white mb-3">
+            <h4 class="text-xs font-bold text-gray-900 dark:text-white mb-2">
               توقعات 5 أيام
             </h4>
-            <div class="space-y-2">
+            <div class="space-y-1.5 max-h-48 overflow-y-auto">
               <div
-                v-for="day in weather.forecast"
-                :key="day.day"
-                class="flex items-center justify-between py-2 px-3 rounded-md hover:bg-gray-50 dark:hover:bg-gray-900/60 text-sm"
+                v-for="(day, i) in forecast"
+                :key="i"
+                class="flex items-center justify-between py-1.5 px-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-900/60 text-xs"
               >
-                <span class="w-20 font-medium text-gray-700 dark:text-gray-300">{{ day.day }}</span>
+                <span class="w-16 font-medium text-gray-700 dark:text-gray-300">{{ day.day }}</span>
                 <UIcon
                   :name="day.icon"
-                  class="size-5 text-primary-500"
+                  class="size-4 text-primary-500"
                 />
-                <div class="w-24 text-left">
+                <div class="w-20 text-left">
                   <span class="font-bold text-gray-900 dark:text-white">{{ day.high }}°</span>
-                  <span class="text-gray-400 mr-2">{{ day.low }}°</span>
+                  <span class="text-gray-400 mr-1">{{ day.low }}°</span>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </template>
-    </UModal>
+    </UPopover>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { useGeolocation, usePermission } from '@vueuse/core'
+import { useWeather } from '../../composables/useWeather'
 
 const isOpen = ref(false)
+const selectedCity = ref<string | null>(null)
 
-const { coords, error, resume } = useGeolocation({
-  enableHighAccuracy: true,
-  immediate: true
+const { weatherState, isGeolocationEnabled, requestLocation, fetchByCity } = useWeather()
+
+const weatherData = computed(() => weatherState.value.data)
+
+const currentTemp = computed(() => {
+  return weatherData.value ? Math.round(weatherData.value.current.temperature_2m) : '--'
 })
 
-const geolocationPermission = usePermission('geolocation')
+const feelsLike = computed(() => {
+  return weatherData.value ? Math.round(weatherData.value.current.apparent_temperature) : '--'
+})
 
-const isGeolocationEnabled = computed(() => {
-  if (error.value || geolocationPermission.value === 'denied') {
-    return false
+const currentCondition = computed(() => {
+  if (!weatherData.value) return '--'
+  return getWeatherCondition(weatherData.value.current.weather_code)
+})
+
+const currentWeatherIcon = computed(() => {
+  if (!weatherData.value) return 'i-heroicons-question-mark-circle-20-solid'
+  return getWeatherIcon(weatherData.value.current.weather_code)
+})
+
+const forecast = computed(() => {
+  if (!weatherData.value) return []
+  const days = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت']
+  const result = []
+
+  for (let i = 0; i < weatherData.value.daily.time.length; i++) {
+    const time = weatherData.value.daily.time[i]
+    const high = weatherData.value.daily.temperature_2m_max[i]
+    const low = weatherData.value.daily.temperature_2m_min[i]
+    const code = weatherData.value.daily.weather_code[i]
+
+    if (time == null || high == null || low == null || code == null) continue
+
+    const date = new Date(time)
+    const dayName = i === 0 ? 'اليوم' : days[date.getDay()]
+    const icon = getWeatherIcon(code)
+
+    result.push({ day: dayName, high: Math.round(high), low: Math.round(low), icon })
   }
-  return coords.value.latitude !== Infinity && coords.value.longitude !== Infinity
+
+  return result
 })
 
-const requestLocation = () => {
-  resume()
+const cityOptions = ref([
+  { label: 'الرياض', value: 'الرياض' },
+  { label: 'جدة', value: 'جدة' },
+  { label: 'مكة المكرمة', value: 'مكة المكرمة' },
+  { label: 'المدينة المنورة', value: 'المدينة المنورة' },
+  { label: 'الدمام', value: 'الدمام' },
+  { label: 'الخبر', value: 'الخبر' },
+  { label: 'تبوك', value: 'تبوك' },
+  { label: 'أبها', value: 'أبها' },
+  { label: 'بريدة', value: 'بريدة' },
+  { label: 'الطائف', value: 'الطائف' },
+  { label: 'حائل', value: 'حائل' },
+  { label: 'الجبيل', value: 'الجبيل' },
+  { label: 'الخرج', value: 'الخرج' },
+  { label: 'ينبع', value: 'ينبع' },
+  { label: 'عرعر', value: 'عرعر' },
+  { label: 'سكاكا', value: 'سكاكا' },
+  { label: 'جازان', value: 'جازان' },
+  { label: 'نجران', value: 'نجران' },
+  { label: 'الباحة', value: 'الباحة' },
+  { label: 'القطيف', value: 'القطيف' },
+  { label: 'الأحساء', value: 'الأحساء' },
+  { label: 'القصيم', value: 'القصيم' },
+  { label: 'الشمال', value: 'الشمال' },
+  { label: 'الشرقية', value: 'الشرقية' },
+  { label: 'عسير', value: 'عسير' },
+  { label: 'حفر الباطن', value: 'حفر الباطن' },
+  { label: 'صبيا', value: 'صبيا' },
+  { label: 'بيشة', value: 'بيشة' },
+  { label: 'بيش', value: 'بيش' },
+  { label: 'القنفذة', value: 'القنفذة' }
+])
+
+const onCityChange = async (city: unknown) => {
+  if (typeof city !== 'string' || !city) return
+  selectedCity.value = city
+  try {
+    await fetchByCity(city)
+    isOpen.value = false
+  } catch (err) {
+    console.error('فشل جلب الطقس للمدينة:', err)
+  }
 }
 
-const weather = ref({
-  city: 'الرياض',
-  country: 'السعودية',
-  temp: 34,
-  feelsLike: 37,
-  condition: 'مشمس غالباً',
-  icon: 'i-heroicons-sun-20-solid',
-  humidity: 22,
-  windSpeed: 14,
-  pressure: 1012,
-  uvIndex: '8 (مرتفع جداً)',
-  visibility: '10 كم',
-  dewPoint: '11°م',
-  forecast: [
-    { day: 'اليوم', high: 34, low: 22, icon: 'i-heroicons-sun-20-solid' },
-    { day: 'السبت', high: 35, low: 23, icon: 'i-heroicons-sun-20-solid' },
-    { day: 'الأحد', high: 33, low: 21, icon: 'i-heroicons-cloud-sun-20-solid' },
-    { day: 'الإثنين', high: 31, low: 20, icon: 'i-heroicons-cloud-20-solid' },
-    { day: 'الثلاثاء', high: 32, low: 20, icon: 'i-heroicons-sun-20-solid' }
-  ]
-})
+const getWeatherCondition = (code: number): string => {
+  if (code === 0) return 'سماء صافية'
+  if (code === 1) return 'صافي غالباً'
+  if (code === 2) return 'غائم جزئياً'
+  if (code === 3) return 'غائم'
+  if (code >= 45 && code <= 48) return 'ضبابي'
+  if (code >= 51 && code <= 55) return 'رذاذ'
+  if (code >= 61 && code <= 65) return 'ماطر'
+  if (code >= 71 && code <= 75) return 'ثلجي'
+  if (code >= 80 && code <= 82) return 'زخات مطر'
+  if (code >= 95 && code <= 99) return 'عاصفة رعدية'
+  return 'غير معروف'
+}
 
-const metrics = computed(() => [
-  { label: 'الرطوبة', value: `٪${weather.value.humidity}`, icon: 'i-heroicons-swatch' },
-  { label: 'سرعة الرياح', value: `${weather.value.windSpeed} كم/س`, icon: 'i-heroicons-arrow-path-20-solid' },
-  { label: 'الضغط الجوي', value: `${weather.value.pressure} هكتوباسكال`, icon: 'i-heroicons-variable' },
-  { label: 'مؤشر الأشعة فوق البنفسجية', value: weather.value.uvIndex, icon: 'i-heroicons-sparkles' },
-  { label: 'مدى الرؤية', value: weather.value.visibility, icon: 'i-heroicons-eye' },
-  { label: 'نقطة الندى', value: weather.value.dewPoint, icon: 'i-heroicons-beaker' }
-])
+const getWeatherIcon = (code: number): string => {
+  if (code === 0) return 'i-heroicons-sun-20-solid'
+  if (code >= 1 && code <= 3) return 'i-heroicons-cloud-sun-20-solid'
+  if (code >= 45 && code <= 48) return 'i-heroicons-cloud-20-solid'
+  if (code >= 51 && code <= 55) return 'i-heroicons-cloud-rain-20-solid'
+  if (code >= 61 && code <= 65) return 'i-heroicons-cloud-rain-20-solid'
+  if (code >= 71 && code <= 75) return 'i-heroicons-snow-20-solid'
+  if (code >= 80 && code <= 82) return 'i-heroicons-cloud-rain-20-solid'
+  if (code >= 95 && code <= 99) return 'i-heroicons-bolt-20-solid'
+  return 'i-heroicons-cloud-20-solid'
+}
 </script>
