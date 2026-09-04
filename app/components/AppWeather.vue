@@ -26,12 +26,11 @@
     <!-- بطاقة الطقس الأفقية -->
     <UPopover
       v-else
-      :open="isOpen"
+      v-model:open="isOpen"
     >
       <UCard
         class="group cursor-pointer transition-all duration-200 hover:border-primary-500/50"
         :ui="{ body: 'px-3 py-1.5 sm:px-3 sm:py-1.5' }"
-        @click="isOpen = !isOpen"
       >
         <div class="flex items-center gap-3">
           <div class="flex items-center gap-1.5">
@@ -55,8 +54,8 @@
           </div>
 
           <div class="hidden 2xl:flex items-center gap-3 text-[11px] text-gray-500 dark:text-gray-400 border-r border-gray-200 dark:border-gray-700 pr-3">
-            <span>💧 ٪{{ weatherData?.current.relative_humidity_2m ?? '--' }}</span>
-            <span>💨 {{ weatherData?.current.wind_speed_10m ?? '--' }} كم/س</span>
+            <span><UIcon name="i-lucide-droplets" /> ٪{{ weatherData?.current.relative_humidity_2m ?? '--' }}</span>
+            <span><UIcon name="i-lucide-wind" /> {{ weatherData?.current.wind_speed_10m ?? '--' }} كم/س</span>
           </div>
         </div>
       </UCard>
