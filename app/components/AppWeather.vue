@@ -18,7 +18,7 @@
     <!-- بطاقة التنبيه عند تعطيل الموقع أو رفض الصلاحية -->
     <div
       v-else-if="!isGeolocationEnabled || locationError"
-      class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-amber-500/40 bg-amber-50 text-amber-800 text-xs"
+      class="inline-flex items-center gap-2 px-3 py-1.5 text-default text-xs"
     >
       <UIcon
         name="i-heroicons-exclamation-triangle-20-solid"
@@ -43,7 +43,7 @@
     >
       <UCard
         class="group cursor-pointer transition-all duration-200 hover:border-primary-500/50 border border-default"
-        :ui="{ body: 'px-3 py-1.5 sm:px-3 sm:py-1.5' }"
+        :ui="{ body: 'px-2 py-1 sm:px-3 sm:py-1.5' }"
       >
         <div class="flex items-center gap-3">
           <div class="flex items-center gap-1.5">

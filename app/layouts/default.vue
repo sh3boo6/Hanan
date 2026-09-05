@@ -45,7 +45,7 @@ const isSlideoverOpen = ref(false)
           <ClientOnly>
             <LazyAppWeather />
           </ClientOnly>
-          <div class="flex items-center gap-3">
+          <div class="flex items-center gap-2">
             <AppSearch class="hidden md:flex" />
             <LazyAppShare />
             <UColorModeButton />

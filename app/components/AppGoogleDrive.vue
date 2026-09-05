@@ -266,7 +266,7 @@
                   class="flex items-center gap-3 min-w-0 flex-1 cursor-pointer"
                   @click="item.isFolder ? openFolder(item) : null"
                 >
-                  <div :class="['size-10 rounded-lg flex items-center justify-center shrink-0', item.isFolder ? 'bg-amber-50 text-amber-500' : 'bg-primary-50 text-primary-500']">
+                  <div :class="['size-10 rounded-lg flex items-center justify-center shrink-0', item.isFolder ? 'bg-warning-50 text-warning-500' : 'bg-primary-50 text-primary-500']">
                     <UIcon
                       :name="item.isFolder ? 'i-lucide-folder' : getFileIcon(item.mimeType)"
                       class="size-5"
@@ -499,7 +499,7 @@
                       <span class="text-xs text-accented">الصلاحية:</span>
                       <select
                         v-model="shareRole"
-                        class="text-xs border border-default rounded-lg p-1.5 bg-white text-default font-medium focus:outline-none"
+                        class="text-xs border border-default rounded-lg p-1.5 bg-default text-default font-medium focus:outline-none"
                       >
                         <option value="viewer">مشاهد (Viewer)</option>
                         <option value="commenter">معلّق (Commenter)</option>
