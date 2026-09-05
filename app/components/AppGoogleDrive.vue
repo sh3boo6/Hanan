@@ -184,10 +184,22 @@
                   />
                 </div>
 
-                <div v-if="uploading" class="space-y-2">
+                <div
+                  v-if="uploading"
+                  class="space-y-2"
+                >
                   <div class="flex items-center justify-between text-xs text-default">
                     <span>جاري الرفع...</span>
-                    <span>{{ uploadProgress }}% • {{ uploadSpeed }} • متبقي: {{ timeRemaining }}</span>
+                    <div class="flex items-center gap-2">
+                      <span>{{ uploadProgress }}% • {{ uploadSpeed }} • متبقي: {{ timeRemaining }}</span>
+                      <UButton
+                        size="xs"
+                        color="neutral"
+                        variant="ghost"
+                        icon="i-lucide-x"
+                        @click="cancelUpload"
+                      />
+                    </div>
                   </div>
                   <div class="h-2 bg-default rounded-full overflow-hidden">
                     <div
@@ -574,7 +586,7 @@ interface DriveItem {
   isFolder: boolean
 }
 
-const { loggedIn, user, clear, session } = useUserSession()
+const { loggedIn, user, clear } = useUserSession()
 const userPicture = computed(() => (user.value as { picture?: string } | null)?.picture)
 const userName = computed(() => (user.value as { name?: string } | null)?.name)
 
@@ -584,6 +596,7 @@ const uploading = ref(false)
 const files = ref<DriveItem[]>([])
 const loading = ref(true)
 const refreshing = ref(false)
+const uploadXhrRef = ref<XMLHttpRequest | null>(null)
 
 // Folder Nav State
 const currentFolderId = ref('root')
@@ -622,6 +635,17 @@ const onFileChange = (e: Event) => {
 const resetSelectedFile = () => {
   selectedFile.value = null
   if (fileInputRef.value) fileInputRef.value.value = ''
+}
+
+const cancelUpload = () => {
+  if (uploadXhrRef.value) {
+    uploadXhrRef.value.abort()
+    uploadXhrRef.value = null
+  }
+  uploading.value = false
+  uploadProgress.value = 0
+  uploadSpeed.value = ''
+  timeRemaining.value = ''
 }
 
 const formatFileSize = (bytes: number): string => {
@@ -801,10 +825,12 @@ const uploadFile = async () => {
     formData.append('folderId', currentFolderId.value)
 
     const xhr = new XMLHttpRequest()
+    uploadXhrRef.value = xhr
     const totalSize = selectedFile.value.size
     let lastLoaded = 0
     let lastTime = Date.now()
 
+    xhr.withCredentials = true
     xhr.upload.addEventListener('progress', (event) => {
       if (event.lengthComputable) {
         const loaded = event.loaded
@@ -842,6 +868,7 @@ const uploadFile = async () => {
     })
 
     xhr.addEventListener('load', () => {
+      uploadXhrRef.value = null
       if (xhr.status >= 200 && xhr.status < 300) {
         resetSelectedFile()
         refreshFiles()
@@ -861,9 +888,18 @@ const uploadFile = async () => {
     })
 
     xhr.addEventListener('error', () => {
+      uploadXhrRef.value = null
       toast.add({
         title: 'فشل في الاتصال',
         color: 'error'
+      })
+    })
+
+    xhr.addEventListener('abort', () => {
+      uploadXhrRef.value = null
+      toast.add({
+        title: 'تم إلغاء الرفع',
+        color: 'neutral'
       })
     })
 
@@ -873,6 +909,7 @@ const uploadFile = async () => {
     console.error('Upload error:', err)
   } finally {
     uploading.value = false
+    uploadXhrRef.value = null
   }
 }
 
