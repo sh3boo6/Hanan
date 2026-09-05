@@ -804,17 +804,25 @@ const uploadFile = async () => {
   timeRemaining.value = ''
 
   try {
-    const formData = new FormData()
-    formData.append('file', selectedFile.value, selectedFile.value.name)
-    formData.append('folderId', currentFolderId.value)
+    const file = selectedFile.value
 
+    // 1. جلب رابط الرفع المباشر من سيرفر Nuxt بدون إرسال الملف نفسه
+    const { uploadUrl } = await $fetch<{ uploadUrl: string }>('/api/drive/upload', {
+      method: 'POST',
+      body: {
+        name: file.name,
+        mimeType: file.type || 'application/octet-stream',
+        size: file.size,
+        folderId: currentFolderId.value
+      }
+    })
+
+    // 2. إرسال بايتات الملف مباشرة من المتصفح إلى Google Drive
     const xhr = new XMLHttpRequest()
     uploadXhrRef.value = xhr
-    const totalSize = selectedFile.value.size
+    const totalSize = file.size
     let lastLoaded = 0
     let lastTime = Date.now()
-
-    xhr.withCredentials = true
 
     xhr.upload.addEventListener('progress', (event) => {
       if (event.lengthComputable) {
@@ -860,21 +868,14 @@ const uploadFile = async () => {
         resetSelectedFile()
         await refreshFiles()
       } else {
-        let message = 'فشل في الرفع'
-        try {
-          const data = JSON.parse(xhr.responseText)
-          message = data?.message || message
-        } catch {
-          // ignore
-        }
-        toast.add({ title: message, color: 'error' })
+        toast.add({ title: 'فشل في رفع الملف إلى Google Drive', color: 'error' })
       }
     })
 
     xhr.addEventListener('error', () => {
       uploading.value = false
       uploadXhrRef.value = null
-      toast.add({ title: 'فشل في الاتصال أثناء الرفع', color: 'error' })
+      toast.add({ title: 'فشل في الاتصال أثناء الرفع المباشر', color: 'error' })
     })
 
     xhr.addEventListener('abort', () => {
@@ -883,11 +884,14 @@ const uploadFile = async () => {
       toast.add({ title: 'تم إلغاء الرفع', color: 'neutral' })
     })
 
-    xhr.open('POST', '/api/drive/upload')
-    xhr.send(formData)
+    // إرسال PUT مباشرة مع بروتوكول جوجل
+    xhr.open('PUT', uploadUrl)
+    xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream')
+    xhr.send(file)
   } catch (err) {
     uploading.value = false
-    console.error('Upload error:', err)
+    toast.add({ title: 'فشل في إعداد رفع الملف', color: 'error' })
+    console.error('Upload init error:', err)
   }
 }
 
