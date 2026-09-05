@@ -30,7 +30,7 @@
             />
           </span>
         </h1>
-        <p class="text-base sm:text-lg">
+        <p class="text-base sm:text-lg text-default">
           إنشاء المجلدات والملفات، التحكم في خيارات المشاركة والحذف، وتصفح مستنداتك بسلاسة.
         </p>
 
@@ -64,7 +64,7 @@
                 size="lg"
               />
               <div>
-                <h3 class="font-bold text-gray-900 text-base">
+                <h3 class="font-bold text-default text-base">
                   {{ userName }}
                 </h3>
                 <p class="text-xs text-gray-500">
@@ -102,7 +102,7 @@
             <!-- Fast Creation Actions -->
             <UCard class="border border-default rounded-2xl">
               <template #header>
-                <h3 class="font-bold text-gray-900 flex items-center gap-2">
+                <h3 class="font-bold text-default flex items-center gap-2">
                   <UIcon
                     name="i-lucide-plus-circle"
                     class="size-5 text-primary-500"
@@ -125,7 +125,7 @@
             <!-- File Upload Widget -->
             <UCard class="border border-default rounded-2xl">
               <template #header>
-                <h3 class="font-bold text-gray-900 flex items-center gap-2">
+                <h3 class="font-bold text-default flex items-center gap-2">
                   <UIcon
                     name="i-lucide-upload-cloud"
                     class="size-5 text-primary-500"
@@ -152,7 +152,7 @@
                     name="i-lucide-file-up"
                     class="size-8 text-gray-400 mx-auto mb-2"
                   />
-                  <p class="text-xs font-semibold text-gray-700">
+                  <p class="text-xs font-semibold text-default">
                     {{ selectedFile ? selectedFile.name : 'اضغط لاختيار ملف للرفع' }}
                   </p>
                   <p
@@ -192,7 +192,7 @@
             <template #header>
               <div class="flex items-center justify-between">
                 <!-- Breadcrumbs Directory Trail -->
-                <div class="flex items-center gap-1.5 text-sm font-bold text-gray-900">
+                <div class="flex items-center gap-1.5 text-sm font-bold text-default">
                   <UIcon
                     name="i-lucide-folder"
                     class="size-5 text-amber-500"
@@ -273,7 +273,7 @@
                     />
                   </div>
                   <div class="min-w-0">
-                    <p class="text-sm font-bold text-gray-900 truncate group-hover:text-primary-500 transition-colors">
+                    <p class="text-sm font-bold text-default truncate group-hover:text-primary-500 transition-colors">
                       {{ item.name }}
                     </p>
                     <p class="text-[11px] text-gray-400">
@@ -402,8 +402,8 @@
             dir="rtl"
             class="p-6 space-y-4"
           >
-            <p class="text-sm text-gray-700">
-              هل أنت تأكد من رغبتك في حذف <span class="font-bold text-gray-900">{{ itemToDelete?.name }}</span>؟
+            <p class="text-sm text-default">
+              هل أنت تأكد من رغبتك في حذف <span class="font-bold text-default">{{ itemToDelete?.name }}</span>؟
             </p>
             <p
               v-if="itemToDelete?.isFolder"
@@ -443,7 +443,7 @@
             class="p-6 space-y-6"
           >
             <div class="space-y-3">
-              <h4 class="text-sm font-bold text-gray-900">
+              <h4 class="text-sm font-bold text-default">
                 الوصول العام
               </h4>
 
@@ -457,7 +457,7 @@
                     class="mt-1 text-primary-500 focus:ring-primary-500"
                   >
                   <div>
-                    <div class="flex items-center gap-1.5 font-bold text-sm text-gray-900">
+                    <div class="flex items-center gap-1.5 font-bold text-sm text-default">
                       <UIcon
                         name="i-lucide-lock"
                         class="size-4 text-gray-500"
@@ -481,7 +481,7 @@
                     class="mt-1 text-primary-500 focus:ring-primary-500"
                   >
                   <div class="flex-1">
-                    <div class="flex items-center gap-1.5 font-bold text-sm text-gray-900">
+                    <div class="flex items-center gap-1.5 font-bold text-sm text-default">
                       <UIcon
                         name="i-lucide-globe"
                         class="size-4 text-emerald-500"
@@ -496,10 +496,10 @@
                       v-if="shareAccessType === 'anyone'"
                       class="mt-3 flex items-center gap-2"
                     >
-                      <span class="text-xs text-gray-600">الصلاحية:</span>
+                      <span class="text-xs text-gray-500">الصلاحية:</span>
                       <select
                         v-model="shareRole"
-                        class="text-xs border border-default rounded-lg p-1.5 bg-white text-gray-900 font-medium focus:outline-none"
+                        class="text-xs border border-default rounded-lg p-1.5 bg-white text-default font-medium focus:outline-none"
                       >
                         <option value="viewer">مشاهد (Viewer)</option>
                         <option value="commenter">معلّق (Commenter)</option>
