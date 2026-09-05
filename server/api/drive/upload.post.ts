@@ -1,6 +1,14 @@
+interface DriveTokens {
+  access_token: string
+}
+
+interface DriveSecureSession {
+  tokens: DriveTokens
+}
+
 export default defineEventHandler(async (event) => {
   const session = await getUserSession(event)
-  const accessToken = session.secure?.tokens?.access_token || session.secure?.accessToken
+  const accessToken = (session.secure as DriveSecureSession | undefined)?.tokens?.access_token
 
   if (!accessToken) {
     throw createError({ statusCode: 401, statusMessage: 'غير مصرح بالدخول' })
@@ -48,7 +56,7 @@ export default defineEventHandler(async (event) => {
   const response = await $fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${accessToken}`,
+      'Authorization': `Bearer ${accessToken}`,
       'Content-Type': `multipart/related; boundary=${boundary}`
     },
     body: multipartRequestBody

@@ -23,16 +23,11 @@ export default defineOAuthGoogleEventHandler({
     })
   },
   async onError(event, error) {
-    const message = error?.data?.message || error?.statusMessage || error?.message || 'فشل تسجيل الدخول باستخدام Google'
-    const details = error?.data || error?.cause || {}
-    return new Response(
-      `<!DOCTYPE html><html><body style="font-family: sans-serif; direction: rtl; text-align: center; padding: 2rem;">
-        <h1>خطأ في تسجيل الدخول</h1>
-        <p>${message}</p>
-        <pre>${JSON.stringify(details, null, 2)}</pre>
-        <a href="/">العودة للرئيسية</a>
-      </body></html>`,
-      { status: 500, headers: { 'content-type': 'text/html' } }
-    )
+    console.error('Google OAuth error', error)
+    throw createError({
+      statusCode: 500,
+      statusMessage: 'فشل تسجيل الدخول باستخدام Google',
+      cause: error
+    })
   }
 })
