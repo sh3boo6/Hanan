@@ -13,6 +13,11 @@ const items = ref<NavigationMenuItem[]>([
     to: '/todo'
   },
   {
+    label: 'Drive',
+    icon: 'i-simple-icons-googledrive',
+    to: '/google'
+  },
+  {
     label: 'الاخبار',
     icon: 'i-lucide-newspaper',
     to: '/news'
@@ -44,6 +49,7 @@ const isSlideoverOpen = ref(false)
             <AppSearch class="hidden md:flex" />
             <LazyAppShare />
             <UColorModeButton />
+            <UserAvatar />
             <!-- استخدام v-model:open للتحكم الكامل بالحالة -->
             <USlideover
               v-model:open="isSlideoverOpen"
