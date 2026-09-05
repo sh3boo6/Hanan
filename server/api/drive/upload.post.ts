@@ -1,3 +1,5 @@
+import { readMultipartFormData } from 'h3'
+
 interface DriveTokens {
   access_token: string
 }
@@ -14,13 +16,11 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 401, statusMessage: 'غير مصرح بالدخول' })
   }
 
-  // قراءة كافة الحقول المرسلة في Multipart Form Data
   const formData = await readMultipartFormData(event)
   if (!formData || formData.length === 0) {
     throw createError({ statusCode: 400, statusMessage: 'لم يتم اختيار أي ملف' })
   }
 
-  // استخراج الملف و folderId
   const fileItem = formData.find(item => item.name === 'file')
   const folderIdItem = formData.find(item => item.name === 'folderId')
 
@@ -28,39 +28,52 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: 'ملف غير صالح' })
   }
 
-  // تحويل folderId القادم وإذا كان 'root' أو غير موجود نستخدم 'root'
   const targetFolderId = folderIdItem?.data?.toString('utf-8') || 'root'
 
-  // إعداد بيانات الميتاداتا لـ Google Drive
   const metadata = {
     name: fileItem.filename || 'file',
     mimeType: fileItem.type || 'application/octet-stream',
-    parents: [targetFolderId] // 👈 إدراج المجلد المستهدف هنا
+    parents: [targetFolderId]
   }
 
-  // استخدام Multipart Boundary لإرسال الملف مع الميتاداتا في طلب واحد
-  const boundary = '-------314159265358979323846'
-  const delimiter = `\r\n--${boundary}\r\n`
-  const closeDelimiter = `\r\n--${boundary}--`
+  // إعداد الـ Boundary بشكل دقيق متوافق مع Google Drive API
+  const boundary = '----WebKitFormBoundary3141592653589793'
 
+  const headerPart = Buffer.from(
+    `--${boundary}\r\n`
+    + 'Content-Type: application/json; charset=UTF-8\r\n\r\n'
+    + `${JSON.stringify(metadata)}\r\n`
+    + `--${boundary}\r\n`
+    + `Content-Type: ${metadata.mimeType}\r\n\r\n`
+  )
+
+  const footerPart = Buffer.from(`\r\n--${boundary}--`)
+
+  // دمج البيانات بالترتيب الصحيح
   const multipartRequestBody = Buffer.concat([
-    Buffer.from(
-      `${delimiter}Content-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(metadata)}`
-    ),
-    Buffer.from(`\r\n--${boundary}\r\nContent-Type: ${metadata.mimeType}\r\n\r\n`),
+    headerPart,
     fileItem.data,
-    Buffer.from(closeDelimiter)
+    footerPart
   ])
 
-  // رفع الملف باستخدام multipart/related
-  const response = await $fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-      'Content-Type': `multipart/related; boundary=${boundary}`
-    },
-    body: multipartRequestBody
-  })
+  try {
+    const response = await $fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': `multipart/related; boundary=${boundary}`,
+        'Content-Length': multipartRequestBody.length.toString()
+      },
+      body: multipartRequestBody
+    })
 
-  return response
+    return response
+  } catch (err: unknown) {
+    const errorObj = err as { statusCode?: number, data?: { error?: { message?: string } } }
+
+    throw createError({
+      statusCode: errorObj.statusCode || 500,
+      statusMessage: errorObj.data?.error?.message || 'فشل في رفع الملف إلى Google Drive'
+    })
+  }
 })

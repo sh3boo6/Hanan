@@ -54,6 +54,13 @@ export default defineNuxtConfig({
 
   compatibilityDate: '2026-06-30',
 
+  nitro: {
+    experimental: {
+      asyncContext: true
+    },
+    bodySizeLimit: '500mb'
+  },
+
   auth: {
     provider: {
       google: {
