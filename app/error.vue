@@ -1,44 +1,87 @@
 <template>
-  <div class="min-h-screen flex flex-col items-center justify-center p-6 text-center">
-    <UCard class="max-w-md w-full border border-default">
-      <div class="py-8 space-y-4">
-        <div class="mx-auto w-24 h-24 rounded-full bg-primary-50 dark:bg-primary-950/40 flex items-center justify-center">
-          <UIcon
-            :name="error?.statusCode === 404 ? 'i-lucide-frown' : 'i-lucide-alert-circle'"
-            class="size-12 text-primary-500"
-          />
-        </div>
-
-        <h1 class="text-6xl font-black text-default tracking-tight">
-          {{ error?.statusCode || 404 }}
-        </h1>
-
-        <h2 class="text-xl font-bold text-default">
-          {{ error?.statusCode === 404 ? 'الصفحة غير موجودة' : 'حدث خطأ ما' }}
-        </h2>
-
-        <p class="text-sm text-accented">
-          {{ error?.message || 'عذراً، لم نتمكن من العثور على الصفحة التي تبحث عنها. قد تكون محذوفة أو منقولة أو لم تعد موجودة.' }}
-        </p>
-
-        <UButton
-          to="/"
-          color="primary"
-          size="lg"
-          block
-          icon="i-lucide-home"
+  <div class="min-h-screen flex flex-col items-center justify-center p-4 bg-background">
+    <div class="max-w-md w-full text-center space-y-6">
+      <!-- App Brand / Header -->
+      <div class="flex items-center justify-center gap-3">
+        <img
+          src="/logo.png"
+          alt="App Logo"
+          class="size-10 object-contain"
         >
-          العودة للرئيسية
-        </UButton>
+        <span class="text-2xl font-bold text-default">
+          {{ appName }}
+        </span>
       </div>
-    </UCard>
+
+      <!-- Error Card -->
+      <UCard class="border border-default rounded-2xl p-6 shadow-sm">
+        <div class="space-y-4">
+          <!-- Status Code Badge -->
+          <UBadge
+            color="error"
+            variant="subtle"
+            size="lg"
+            class="font-mono font-bold"
+          >
+            {{ error.statusCode || 500 }}
+          </UBadge>
+
+          <!-- Error Title & Message -->
+          <h1 class="text-2xl font-bold text-default">
+            {{ is404 ? 'الصفحة غير موجودة' : 'حدث خطأ غير متوقع' }}
+          </h1>
+
+          <p class="text-sm text-accented">
+            {{ is404 ? 'عذراً، لم نتمكن من العثور على الصفحة التي تبحث عنها.' : (error.statusMessage || error.message || 'حدث خطأ أثناء معالجة طلبك.') }}
+          </p>
+
+          <!-- Action Buttons -->
+          <div class="pt-4 flex items-center justify-center gap-3">
+            <UButton
+              color="primary"
+              icon="i-lucide-home"
+              size="md"
+              @click="handleError"
+            >
+              الرئيسية
+            </UButton>
+
+            <UButton
+              color="neutral"
+              variant="soft"
+              icon="i-lucide-rotate-ccw"
+              size="md"
+              @click="refreshPage"
+            >
+              إعادة المحاولة
+            </UButton>
+          </div>
+        </div>
+      </UCard>
+
+      <!-- Footer Info -->
+      <p class="text-xs text-accented">
+        إذا استمرت المشكلة، يرجى التواصل مع الدعم الفني.
+      </p>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-const error = useError()
+import type { NuxtError } from '#app'
 
-useHead({
-  title: computed(() => `${error.value?.statusCode || 404} - خطأ`)
-})
+const props = defineProps<{
+  error: NuxtError
+}>()
+
+const config = useRuntimeConfig()
+const appName = computed(() => config.public.appName || 'اسم التطبيق')
+
+const is404 = computed(() => props.error.statusCode === 404)
+
+// Clear error state and navigate back to safety
+const handleError = () => clearError({ redirect: '/' })
+
+// Refresh current page
+const refreshPage = () => window.location.reload()
 </script>
