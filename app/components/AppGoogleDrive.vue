@@ -806,8 +806,8 @@ const uploadFile = async () => {
   try {
     const file = selectedFile.value
 
-    // 1. طلب رابط الجلسة
-    const { uploadUrl } = await $fetch<{ uploadUrl: string }>('/api/drive/upload', {
+    // 1. إنشاء جلسة الرفع
+    const { uploadUrl } = await $fetch<{ uploadUrl: string }>('/api/drive/upload?action=create-session', {
       method: 'POST',
       body: {
         name: file.name,
@@ -817,8 +817,8 @@ const uploadFile = async () => {
       }
     })
 
-    // 2. رفع الملف على أجزاء (Chunks) بحجم 2 ميجابايت للجزء
-    const CHUNK_SIZE = 2 * 1024 * 1024 // 2MB
+    // 2. رفع الملف على أجزاء بحجم 2MB (لتكون أقل من حد Vercel 4.5MB وتمنع CORS)
+    const CHUNK_SIZE = 2 * 1024 * 1024 // 2 Megabytes
     const totalSize = file.size
     let start = 0
     const startTime = Date.now()
@@ -827,35 +827,28 @@ const uploadFile = async () => {
       const end = Math.min(start + CHUNK_SIZE, totalSize)
       const chunk = file.slice(start, end)
 
-      const response = await fetch(uploadUrl, {
-        method: 'PUT',
-        headers: {
-          'Content-Length': (end - start).toString(),
-          'Content-Range': `bytes ${start}-${end - 1}/${totalSize}`
-        },
-        body: chunk
+      const formData = new FormData()
+      formData.append('chunk', chunk)
+      formData.append('uploadUrl', uploadUrl)
+      formData.append('contentRange', `bytes ${start}-${end - 1}/${totalSize}`)
+
+      // إرسال الجزء إلى سيرفر Nuxt الخالي من قيود CORS
+      await $fetch('/api/drive/upload', {
+        method: 'POST',
+        body: formData
       })
 
-      if (!response.ok && response.status !== 308) {
-        throw new Error(`فشل رفع الجزء: ${response.statusText}`)
-      }
-
       start = end
-
-      // حساب النسبة المئوية
       uploadProgress.value = Math.round((start / totalSize) * 100)
 
-      // حساب السرعة والوقت المتبقي
       const elapsedSeconds = (Date.now() - startTime) / 1000
       const speed = start / elapsedSeconds
       const remainingBytes = totalSize - start
       const remainingSeconds = remainingBytes / speed
 
-      if (speed > 1024 * 1024) {
-        uploadSpeed.value = `${(speed / (1024 * 1024)).toFixed(1)} MB/s`
-      } else {
-        uploadSpeed.value = `${(speed / 1024).toFixed(0)} KB/s`
-      }
+      uploadSpeed.value = speed > 1024 * 1024
+        ? `${(speed / (1024 * 1024)).toFixed(1)} MB/s`
+        : `${(speed / 1024).toFixed(0)} KB/s`
 
       timeRemaining.value = remainingSeconds < 60
         ? `${Math.ceil(remainingSeconds)} ثانية`
@@ -866,8 +859,8 @@ const uploadFile = async () => {
     resetSelectedFile()
     await refreshFiles()
   } catch (err) {
-    console.error('Direct Chunked Upload Error:', err)
-    toast.add({ title: 'فشل في الاتصال أثناء الرفع المباشر', color: 'error' })
+    console.error('Chunk Proxy Upload Error:', err)
+    toast.add({ title: 'فشل في رفع الملف، يرجى المحاولة لاحقاً', color: 'error' })
   } finally {
     uploading.value = false
   }
