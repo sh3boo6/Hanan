@@ -29,7 +29,7 @@
 
     <template v-else>
       <UButton
-        to="/api/auth/google"
+        to="/auth/google"
         external
         color="primary"
         variant="ghost"
