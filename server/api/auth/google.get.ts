@@ -22,7 +22,7 @@ export default defineOAuthGoogleEventHandler({
       loggedInAt: new Date()
     })
 
-    throw createError({ statusCode: 302, statusMessage: 'Redirect', redirectURL: '/' })
+    await sendRedirect(event, '/', false)
   },
   async onError(event, error) {
     console.error('Google OAuth error', error)

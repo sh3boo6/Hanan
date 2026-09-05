@@ -574,7 +574,7 @@ interface DriveItem {
   isFolder: boolean
 }
 
-const { loggedIn, user, clear } = useUserSession()
+const { loggedIn, user, clear, session } = useUserSession()
 const userPicture = computed(() => (user.value as { picture?: string } | null)?.picture)
 const userName = computed(() => (user.value as { name?: string } | null)?.name)
 
@@ -801,16 +801,9 @@ const uploadFile = async () => {
     formData.append('folderId', currentFolderId.value)
 
     const xhr = new XMLHttpRequest()
-    const accessToken = session.value?.secure?.tokens?.access_token as string | undefined
-
-    if (!accessToken) {
-      throw new Error('غير مصرح بالوصول')
-    }
-
     const totalSize = selectedFile.value.size
-    let startTime = Date.now()
     let lastLoaded = 0
-    let lastTime = startTime
+    let lastTime = Date.now()
 
     xhr.upload.addEventListener('progress', (event) => {
       if (event.lengthComputable) {
@@ -818,11 +811,11 @@ const uploadFile = async () => {
         uploadProgress.value = Math.round((loaded / totalSize) * 100)
 
         const now = Date.now()
-        const timeDiff = (now - lastTime) / 1000 // seconds
+        const timeDiff = (now - lastTime) / 1000
 
         if (timeDiff >= 0.5) {
           const bytesDiff = loaded - lastLoaded
-          const speed = bytesDiff / timeDiff // bytes per second
+          const speed = bytesDiff / timeDiff
           const remainingBytes = totalSize - loaded
           const remainingSeconds = remainingBytes / speed
 
@@ -853,16 +846,28 @@ const uploadFile = async () => {
         resetSelectedFile()
         refreshFiles()
       } else {
-        throw new Error(xhr.statusText || 'فشل في الرفع')
+        let message = 'فشل في الرفع'
+        try {
+          const data = JSON.parse(xhr.responseText)
+          message = data?.message || message
+        } catch {
+          // ignore parse error
+        }
+        toast.add({
+          title: message,
+          color: 'error'
+        })
       }
     })
 
     xhr.addEventListener('error', () => {
-      throw new Error('فشل في الاتصال')
+      toast.add({
+        title: 'فشل في الاتصال',
+        color: 'error'
+      })
     })
 
     xhr.open('POST', '/api/drive/upload')
-    xhr.setRequestHeader('Authorization', `Bearer ${accessToken}`)
     xhr.send(formData)
   } catch (err) {
     console.error('Upload error:', err)
