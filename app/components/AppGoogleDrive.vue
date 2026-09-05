@@ -806,7 +806,7 @@ const uploadFile = async () => {
   try {
     const file = selectedFile.value
 
-    // 1. جلب رابط الرفع المباشر من سيرفر Nuxt بدون إرسال الملف نفسه
+    // 1. طلب رابط الجلسة
     const { uploadUrl } = await $fetch<{ uploadUrl: string }>('/api/drive/upload', {
       method: 'POST',
       body: {
@@ -817,81 +817,59 @@ const uploadFile = async () => {
       }
     })
 
-    // 2. إرسال بايتات الملف مباشرة من المتصفح إلى Google Drive
-    const xhr = new XMLHttpRequest()
-    uploadXhrRef.value = xhr
+    // 2. رفع الملف على أجزاء (Chunks) بحجم 2 ميجابايت للجزء
+    const CHUNK_SIZE = 2 * 1024 * 1024 // 2MB
     const totalSize = file.size
-    let lastLoaded = 0
-    let lastTime = Date.now()
+    let start = 0
+    const startTime = Date.now()
 
-    xhr.upload.addEventListener('progress', (event) => {
-      if (event.lengthComputable) {
-        const loaded = event.loaded
-        uploadProgress.value = Math.round((loaded / totalSize) * 100)
+    while (start < totalSize) {
+      const end = Math.min(start + CHUNK_SIZE, totalSize)
+      const chunk = file.slice(start, end)
 
-        const now = Date.now()
-        const timeDiff = (now - lastTime) / 1000
+      const response = await fetch(uploadUrl, {
+        method: 'PUT',
+        headers: {
+          'Content-Length': (end - start).toString(),
+          'Content-Range': `bytes ${start}-${end - 1}/${totalSize}`
+        },
+        body: chunk
+      })
 
-        if (timeDiff >= 0.5) {
-          const bytesDiff = loaded - lastLoaded
-          const speed = bytesDiff / timeDiff
-          const remainingBytes = totalSize - loaded
-          const remainingSeconds = remainingBytes / speed
-
-          lastLoaded = loaded
-          lastTime = now
-
-          if (speed > 1024 * 1024) {
-            uploadSpeed.value = `${(speed / (1024 * 1024)).toFixed(1)} MB/s`
-          } else if (speed > 1024) {
-            uploadSpeed.value = `${(speed / 1024).toFixed(1)} KB/s`
-          } else {
-            uploadSpeed.value = `${speed.toFixed(0)} B/s`
-          }
-
-          if (remainingSeconds < 60) {
-            timeRemaining.value = `${Math.ceil(remainingSeconds)} ثانية`
-          } else if (remainingSeconds < 3600) {
-            timeRemaining.value = `${Math.ceil(remainingSeconds / 60)} دقيقة`
-          } else {
-            timeRemaining.value = `${Math.ceil(remainingSeconds / 3600)} ساعة`
-          }
-        }
+      if (!response.ok && response.status !== 308) {
+        throw new Error(`فشل رفع الجزء: ${response.statusText}`)
       }
-    })
 
-    xhr.addEventListener('load', async () => {
-      uploading.value = false
-      uploadXhrRef.value = null
-      if (xhr.status >= 200 && xhr.status < 300) {
-        toast.add({ title: 'تم رفع الملف بنجاح', color: 'success' })
-        resetSelectedFile()
-        await refreshFiles()
+      start = end
+
+      // حساب النسبة المئوية
+      uploadProgress.value = Math.round((start / totalSize) * 100)
+
+      // حساب السرعة والوقت المتبقي
+      const elapsedSeconds = (Date.now() - startTime) / 1000
+      const speed = start / elapsedSeconds
+      const remainingBytes = totalSize - start
+      const remainingSeconds = remainingBytes / speed
+
+      if (speed > 1024 * 1024) {
+        uploadSpeed.value = `${(speed / (1024 * 1024)).toFixed(1)} MB/s`
       } else {
-        toast.add({ title: 'فشل في رفع الملف إلى Google Drive', color: 'error' })
+        uploadSpeed.value = `${(speed / 1024).toFixed(0)} KB/s`
       }
-    })
 
-    xhr.addEventListener('error', () => {
-      uploading.value = false
-      uploadXhrRef.value = null
-      toast.add({ title: 'فشل في الاتصال أثناء الرفع المباشر', color: 'error' })
-    })
+      timeRemaining.value = remainingSeconds < 60
+        ? `${Math.ceil(remainingSeconds)} ثانية`
+        : `${Math.ceil(remainingSeconds / 60)} دقيقة`
+    }
 
-    xhr.addEventListener('abort', () => {
-      uploading.value = false
-      uploadXhrRef.value = null
-      toast.add({ title: 'تم إلغاء الرفع', color: 'neutral' })
-    })
-
-    // إرسال PUT مباشرة مع بروتوكول جوجل
-    xhr.open('PUT', uploadUrl)
-    xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream')
-    xhr.send(file)
+    toast.add({ title: 'تم رفع الملف بنجاح', color: 'success' })
+    resetSelectedFile()
+    await refreshFiles()
   } catch (err) {
+    console.error('Direct Chunked Upload Error:', err)
+    toast.add({ title: 'فشل في الاتصال أثناء الرفع المباشر', color: 'error' })
+  } finally {
     uploading.value = false
-    toast.add({ title: 'فشل في إعداد رفع الملف', color: 'error' })
-    console.error('Upload init error:', err)
   }
 }
 

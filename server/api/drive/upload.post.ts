@@ -14,7 +14,6 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 401, statusMessage: 'غير مصرح بالدخول' })
   }
 
-  // نقرأ فقط اسم الملف، حجمه، ونوعه من الـ JSON
   const body = await readBody(event)
   const { name, mimeType, size, folderId } = body || {}
 
@@ -23,7 +22,6 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
-    // طلب جلسة رفع من Google Drive مباشرة
     const sessionResponse = await fetch(
       'https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable',
       {
@@ -44,7 +42,7 @@ export default defineEventHandler(async (event) => {
     if (!sessionResponse.ok) {
       throw createError({
         statusCode: sessionResponse.status,
-        statusMessage: 'فشل في إنشاء جلسة رفع الملفات مع Google'
+        statusMessage: 'فشل في إنشاء جلسة الرفع'
       })
     }
 
@@ -53,7 +51,6 @@ export default defineEventHandler(async (event) => {
       throw createError({ statusCode: 500, statusMessage: 'لم يتم استلام رابط الرفع' })
     }
 
-    // نرجع الرابط المباشر للمتصفح
     return { uploadUrl }
   } catch (err: unknown) {
     const errorObj = err as { statusCode?: number, message?: string }
