@@ -4,7 +4,6 @@
     class="w-full min-h-[85vh] flex flex-col justify-center py-10 px-4 sm:px-6 lg:px-8"
   >
     <div class="max-w-6xl w-full mx-auto space-y-8">
-      <!-- Hero Header Section -->
       <div class="text-center space-y-4 max-w-3xl mx-auto">
         <UBadge
           color="primary"
@@ -34,7 +33,6 @@
           إنشاء المجلدات والملفات، التحكم في خيارات المشاركة والحذف، وتصفح مستنداتك بسلاسة.
         </p>
 
-        <!-- CTA Login Button -->
         <div
           v-if="!loggedIn"
           class="pt-2"
@@ -52,9 +50,7 @@
         </div>
       </div>
 
-      <!-- Main Authenticated Drive Experience -->
       <template v-if="loggedIn">
-        <!-- Profile & Top Bar Control -->
         <UCard class="border border-default rounded-2xl">
           <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div class="flex items-center gap-3 w-full sm:w-auto">
@@ -95,11 +91,8 @@
           </div>
         </UCard>
 
-        <!-- Actions & Files Layout -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <!-- Actions & Upload Side Column -->
           <div class="space-y-4">
-            <!-- Fast Creation Actions -->
             <UCard class="border border-default rounded-2xl">
               <template #header>
                 <h3 class="font-bold text-default flex items-center gap-2">
@@ -122,7 +115,6 @@
               </div>
             </UCard>
 
-            <!-- File Upload Widget -->
             <UCard class="border border-default rounded-2xl">
               <template #header>
                 <h3 class="font-bold text-default flex items-center gap-2">
@@ -164,14 +156,13 @@
                 </div>
 
                 <div
-                  v-if="selectedFile"
+                  v-if="selectedFile && !uploading"
                   class="flex gap-2"
                 >
                   <UButton
                     type="submit"
                     block
                     color="primary"
-                    :loading="uploading"
                     icon="i-lucide-upload"
                   >
                     تأكيد الرفع
@@ -191,7 +182,7 @@
                   <div class="flex items-center justify-between text-xs text-default">
                     <span>جاري الرفع...</span>
                     <div class="flex items-center gap-2">
-                      <span>{{ uploadProgress }}% • {{ uploadSpeed }} • متبقي: {{ timeRemaining }}</span>
+                      <span>{{ uploadProgress }}% {{ uploadSpeed ? '• ' + uploadSpeed : '' }} {{ timeRemaining ? '• متبقي: ' + timeRemaining : '' }}</span>
                       <UButton
                         size="xs"
                         color="neutral"
@@ -201,7 +192,7 @@
                       />
                     </div>
                   </div>
-                  <div class="h-2 bg-default rounded-full overflow-hidden">
+                  <div class="h-2 bg-default/20 rounded-full overflow-hidden">
                     <div
                       class="h-full bg-primary-500 transition-all duration-300 ease-out"
                       :style="{ width: `${uploadProgress}%` }"
@@ -212,11 +203,9 @@
             </UCard>
           </div>
 
-          <!-- Files & Folders Directory Explorer -->
           <UCard class="lg:col-span-2 border border-default rounded-2xl">
             <template #header>
               <div class="flex items-center justify-between">
-                <!-- Breadcrumbs Directory Trail -->
                 <div class="flex items-center gap-1.5 text-sm font-bold text-default">
                   <UIcon
                     name="i-lucide-folder"
@@ -248,7 +237,6 @@
               </div>
             </template>
 
-            <!-- Loading Spinner -->
             <div
               v-if="loading"
               class="py-16 text-center"
@@ -262,7 +250,6 @@
               </p>
             </div>
 
-            <!-- Empty Directory -->
             <div
               v-else-if="files.length === 0"
               class="py-16 text-center text-accented space-y-2"
@@ -276,7 +263,6 @@
               </p>
             </div>
 
-            <!-- Files and Folders Listing -->
             <div
               v-else
               class="divide-y divide-accented"
@@ -286,12 +272,11 @@
                 :key="item.id"
                 class="py-3 px-2 flex items-center justify-between gap-3 hover:bg-accented/80 rounded-lg transition-colors group"
               >
-                <!-- Item Type Icon & Title -->
                 <div
                   class="flex items-center gap-3 min-w-0 flex-1 cursor-pointer"
                   @click="item.isFolder ? openFolder(item) : null"
                 >
-                  <div :class="['size-10 rounded-lg flex items-center justify-center shrink-0', item.isFolder ? 'bg-warning-50 text-warning-500' : 'bg-primary-50 text-primary-500']">
+                  <div :class="['size-10 rounded-lg flex items-center justify-center shrink-0', item.isFolder ? 'bg-amber-500/10 text-amber-500' : 'bg-primary-500/10 text-primary-500']">
                     <UIcon
                       :name="item.isFolder ? 'i-lucide-folder' : getFileIcon(item.mimeType)"
                       class="size-5"
@@ -307,7 +292,6 @@
                   </div>
                 </div>
 
-                <!-- Item Actions -->
                 <div class="flex items-center gap-1 shrink-0">
                   <UButton
                     color="neutral"
@@ -328,7 +312,6 @@
                   >
                     فتح
                   </UButton>
-                  <!-- زر الحذف -->
                   <UButton
                     color="error"
                     variant="ghost"
@@ -344,7 +327,6 @@
         </div>
       </template>
 
-      <!-- Modal: إنشاء مجلد جديد -->
       <UModal
         v-model:open="isCreateFolderOpen"
         title="إنشاء مجلد جديد"
@@ -381,7 +363,6 @@
         </template>
       </UModal>
 
-      <!-- Modal: إنشاء ملف نصي جديد -->
       <UModal
         v-model:open="isCreateFileOpen"
         title="إنشاء ملف نصي جديد"
@@ -417,7 +398,6 @@
         </template>
       </UModal>
 
-      <!-- Modal: تأكيد الحذف -->
       <UModal
         v-model:open="isDeleteModalOpen"
         title="تأكيد الحذف"
@@ -457,7 +437,6 @@
         </template>
       </UModal>
 
-      <!-- Modal: إعدادات المشاركة المتقدمة -->
       <UModal
         v-model:open="isShareModalOpen"
         :title="`مشاركة ${selectedShareItem?.isFolder ? 'المجلد' : 'الملف'}: ${selectedShareItem?.name}`"
@@ -625,7 +604,12 @@ const savingShare = ref(false)
 
 const toast = useToast()
 
-const triggerFileInput = () => fileInputRef.value?.click()
+const triggerFileInput = () => {
+  if (fileInputRef.value) {
+    fileInputRef.value.value = ''
+    fileInputRef.value.click()
+  }
+}
 
 const onFileChange = (e: Event) => {
   const target = e.target as HTMLInputElement
@@ -831,6 +815,7 @@ const uploadFile = async () => {
     let lastTime = Date.now()
 
     xhr.withCredentials = true
+
     xhr.upload.addEventListener('progress', (event) => {
       if (event.lengthComputable) {
         const loaded = event.loaded
@@ -867,49 +852,42 @@ const uploadFile = async () => {
       }
     })
 
-    xhr.addEventListener('load', () => {
+    xhr.addEventListener('load', async () => {
+      uploading.value = false
       uploadXhrRef.value = null
       if (xhr.status >= 200 && xhr.status < 300) {
+        toast.add({ title: 'تم رفع الملف بنجاح', color: 'success' })
         resetSelectedFile()
-        refreshFiles()
+        await refreshFiles()
       } else {
         let message = 'فشل في الرفع'
         try {
           const data = JSON.parse(xhr.responseText)
           message = data?.message || message
         } catch {
-          // ignore parse error
+          // ignore
         }
-        toast.add({
-          title: message,
-          color: 'error'
-        })
+        toast.add({ title: message, color: 'error' })
       }
     })
 
     xhr.addEventListener('error', () => {
+      uploading.value = false
       uploadXhrRef.value = null
-      toast.add({
-        title: 'فشل في الاتصال',
-        color: 'error'
-      })
+      toast.add({ title: 'فشل في الاتصال أثناء الرفع', color: 'error' })
     })
 
     xhr.addEventListener('abort', () => {
+      uploading.value = false
       uploadXhrRef.value = null
-      toast.add({
-        title: 'تم إلغاء الرفع',
-        color: 'neutral'
-      })
+      toast.add({ title: 'تم إلغاء الرفع', color: 'neutral' })
     })
 
     xhr.open('POST', '/api/drive/upload')
     xhr.send(formData)
   } catch (err) {
-    console.error('Upload error:', err)
-  } finally {
     uploading.value = false
-    uploadXhrRef.value = null
+    console.error('Upload error:', err)
   }
 }
 
