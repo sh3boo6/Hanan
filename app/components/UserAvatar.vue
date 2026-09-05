@@ -5,7 +5,7 @@
       :items="menuItems"
       :content="{ align: 'end', side: 'bottom' }"
     >
-      <button class="flex items-center gap-2.5 p-1 rounded-full hover:bg-gray-100 transition-colors focus:outline-none">
+      <button class="flex items-center gap-2.5 p-1 rounded-full hover:bg-accented transition-colors focus:outline-none">
         <UAvatar
           :src="(user as GoogleUser).picture"
           :alt="(user as GoogleUser).name"
@@ -16,13 +16,13 @@
           <p class="text-sm font-bold text-default leading-tight">
             {{ (user as GoogleUser).name }}
           </p>
-          <p class="text-[11px] text-gray-500">
+          <p class="text-[11px] text-accented">
             {{ (user as GoogleUser).email }}
           </p>
         </div>
         <UIcon
           name="i-lucide-chevron-down"
-          class="size-4 text-gray-400 hidden sm:block mr-1"
+          class="size-4 text-accented hidden sm:block mr-1"
         />
       </button>
     </UDropdownMenu>

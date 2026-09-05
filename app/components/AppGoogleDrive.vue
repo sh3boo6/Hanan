@@ -67,7 +67,7 @@
                 <h3 class="font-bold text-default text-base">
                   {{ userName }}
                 </h3>
-                <p class="text-xs text-gray-500">
+                <p class="text-xs text-accented">
                   {{ (user as { email?: string } | null)?.email }}
                 </p>
               </div>
@@ -150,14 +150,14 @@
                 >
                   <UIcon
                     name="i-lucide-file-up"
-                    class="size-8 text-gray-400 mx-auto mb-2"
+                    class="size-8 text-accented mx-auto mb-2"
                   />
                   <p class="text-xs font-semibold text-default">
                     {{ selectedFile ? selectedFile.name : 'اضغط لاختيار ملف للرفع' }}
                   </p>
                   <p
                     v-if="selectedFile"
-                    class="text-[11px] text-gray-400 mt-1"
+                    class="text-[11px] text-accented mt-1"
                   >
                     {{ formatFileSize(selectedFile.size) }}
                   </p>
@@ -205,7 +205,7 @@
                     v-for="(folder, idx) in currentPath"
                     :key="folder.id"
                   >
-                    <span class="text-gray-400">/</span>
+                    <span class="text-accented">/</span>
                     <span
                       class="cursor-pointer hover:underline"
                       @click="navigateToPathIndex(idx)"
@@ -232,7 +232,7 @@
                 name="i-lucide-loader-2"
                 class="size-8 text-primary-500 animate-spin mx-auto mb-2"
               />
-              <p class="text-xs text-gray-400">
+              <p class="text-xs text-accented">
                 جاري جلب المحتويات...
               </p>
             </div>
@@ -240,7 +240,7 @@
             <!-- Empty Directory -->
             <div
               v-else-if="files.length === 0"
-              class="py-16 text-center text-gray-400 space-y-2"
+              class="py-16 text-center text-accented space-y-2"
             >
               <UIcon
                 name="i-lucide-folder-open"
@@ -254,12 +254,12 @@
             <!-- Files and Folders Listing -->
             <div
               v-else
-              class="divide-y divide-gray-100"
+              class="divide-y divide-accented"
             >
               <div
                 v-for="item in files"
                 :key="item.id"
-                class="py-3 px-2 flex items-center justify-between gap-3 hover:bg-gray-50/80 rounded-lg transition-colors group"
+                class="py-3 px-2 flex items-center justify-between gap-3 hover:bg-accented/80 rounded-lg transition-colors group"
               >
                 <!-- Item Type Icon & Title -->
                 <div
@@ -276,7 +276,7 @@
                     <p class="text-sm font-bold text-default truncate group-hover:text-primary-500 transition-colors">
                       {{ item.name }}
                     </p>
-                    <p class="text-[11px] text-gray-400">
+                    <p class="text-[11px] text-accented">
                       {{ item.isFolder ? 'مجلد' : formatFileSize(Number(item.size)) }} • {{ formatDate(item.modifiedTime) }}
                     </p>
                   </div>
@@ -447,7 +447,7 @@
                 الوصول العام
               </h4>
 
-              <div class="p-4 rounded-xl border border-default space-y-4 bg-gray-50/50">
+              <div class="p-4 rounded-xl border border-default space-y-4 bg-accented/50">
                 <label class="flex items-start gap-3 cursor-pointer">
                   <input
                     v-model="shareAccessType"
@@ -460,11 +460,11 @@
                     <div class="flex items-center gap-1.5 font-bold text-sm text-default">
                       <UIcon
                         name="i-lucide-lock"
-                        class="size-4 text-gray-500"
+                        class="size-4 text-accented"
                       />
                       حصري (Restricted)
                     </div>
-                    <p class="text-xs text-gray-500 mt-0.5">
+                    <p class="text-xs text-accented mt-0.5">
                       يمكن فقط للأشخاص الذين يمتلكون الإذن فتح هذا الرابط.
                     </p>
                   </div>
@@ -488,7 +488,7 @@
                       />
                       أي شخص لديه الرابط (Anyone with the link)
                     </div>
-                    <p class="text-xs text-gray-500 mt-0.5">
+                    <p class="text-xs text-accented mt-0.5">
                       يمكن لأي شخص لديه هذا الرابط الوصول بدون تسجيل الدخول.
                     </p>
 
@@ -496,7 +496,7 @@
                       v-if="shareAccessType === 'anyone'"
                       class="mt-3 flex items-center gap-2"
                     >
-                      <span class="text-xs text-gray-500">الصلاحية:</span>
+                      <span class="text-xs text-accented">الصلاحية:</span>
                       <select
                         v-model="shareRole"
                         class="text-xs border border-default rounded-lg p-1.5 bg-white text-default font-medium focus:outline-none"
