@@ -543,8 +543,6 @@
           </div>
         </template>
       </UModal>
-
-      <UToaster />
     </div>
   </div>
 </template>
