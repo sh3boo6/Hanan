@@ -4,13 +4,10 @@
       <!-- App Brand / Header -->
       <div class="flex items-center justify-center gap-3">
         <img
-          src="/logo.png"
+          src="/img/logo.png"
           alt="App Logo"
-          class="size-10 object-contain"
+          class="size-26 object-contain"
         >
-        <span class="text-2xl font-bold text-default">
-          {{ appName }}
-        </span>
       </div>
 
       <!-- Error Card -->
