@@ -1,3 +1,5 @@
+import { send } from 'h3'
+
 export default defineOAuthGoogleEventHandler({
   config: {
     scope: ['email', 'profile', 'https://www.googleapis.com/auth/drive.file']
@@ -21,6 +23,21 @@ export default defineOAuthGoogleEventHandler({
       },
       loggedInAt: new Date()
     })
+
+    // 🟢 استخدام send من h3 لتجنب تعارض أنواع TypeScript مع onSuccess
+    const html = `<!DOCTYPE html>
+      <html>
+        <head>
+          <meta http-equiv="refresh" content="0;url=/">
+          <script>window.location.href = "/";</script>
+        </head>
+        <body style="font-family: sans-serif; text-align: center; padding-top: 50px;">
+          <p>جاري تحويلك إلى التطبيق...</p>
+        </body>
+      </html>`
+
+    setHeader(event, 'content-type', 'text/html; charset=utf-8')
+    await send(event, html)
   },
   async onError(event, error) {
     console.error('Google OAuth error', error)
