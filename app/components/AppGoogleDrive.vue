@@ -183,6 +183,19 @@
                     @click="resetSelectedFile"
                   />
                 </div>
+
+                <div v-if="uploading" class="space-y-2">
+                  <div class="flex items-center justify-between text-xs text-default">
+                    <span>جاري الرفع...</span>
+                    <span>{{ uploadProgress }}% • {{ uploadSpeed }} • متبقي: {{ timeRemaining }}</span>
+                  </div>
+                  <div class="h-2 bg-default rounded-full overflow-hidden">
+                    <div
+                      class="h-full bg-primary-500 transition-all duration-300 ease-out"
+                      :style="{ width: `${uploadProgress}%` }"
+                    />
+                  </div>
+                </div>
               </form>
             </UCard>
           </div>
@@ -771,17 +784,88 @@ const copyShareLink = (link: string) => {
 }
 
 // Upload & Fetch
+const uploadProgress = ref(0)
+const uploadSpeed = ref('')
+const timeRemaining = ref('')
+
 const uploadFile = async () => {
   if (!selectedFile.value) return
   uploading.value = true
+  uploadProgress.value = 0
+  uploadSpeed.value = ''
+  timeRemaining.value = ''
+
   try {
     const formData = new FormData()
     formData.append('file', selectedFile.value, selectedFile.value.name)
     formData.append('folderId', currentFolderId.value)
 
-    await $fetch('/api/drive/upload', { method: 'POST', body: formData })
-    resetSelectedFile()
-    await refreshFiles()
+    const xhr = new XMLHttpRequest()
+    const accessToken = session.value?.secure?.tokens?.access_token as string | undefined
+
+    if (!accessToken) {
+      throw new Error('غير مصرح بالوصول')
+    }
+
+    const totalSize = selectedFile.value.size
+    let startTime = Date.now()
+    let lastLoaded = 0
+    let lastTime = startTime
+
+    xhr.upload.addEventListener('progress', (event) => {
+      if (event.lengthComputable) {
+        const loaded = event.loaded
+        uploadProgress.value = Math.round((loaded / totalSize) * 100)
+
+        const now = Date.now()
+        const timeDiff = (now - lastTime) / 1000 // seconds
+
+        if (timeDiff >= 0.5) {
+          const bytesDiff = loaded - lastLoaded
+          const speed = bytesDiff / timeDiff // bytes per second
+          const remainingBytes = totalSize - loaded
+          const remainingSeconds = remainingBytes / speed
+
+          lastLoaded = loaded
+          lastTime = now
+
+          if (speed > 1024 * 1024) {
+            uploadSpeed.value = `${(speed / (1024 * 1024)).toFixed(1)} MB/s`
+          } else if (speed > 1024) {
+            uploadSpeed.value = `${(speed / 1024).toFixed(1)} KB/s`
+          } else {
+            uploadSpeed.value = `${speed.toFixed(0)} B/s`
+          }
+
+          if (remainingSeconds < 60) {
+            timeRemaining.value = `${Math.ceil(remainingSeconds)} ثانية`
+          } else if (remainingSeconds < 3600) {
+            timeRemaining.value = `${Math.ceil(remainingSeconds / 60)} دقيقة`
+          } else {
+            timeRemaining.value = `${Math.ceil(remainingSeconds / 3600)} ساعة`
+          }
+        }
+      }
+    })
+
+    xhr.addEventListener('load', () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        resetSelectedFile()
+        refreshFiles()
+      } else {
+        throw new Error(xhr.statusText || 'فشل في الرفع')
+      }
+    })
+
+    xhr.addEventListener('error', () => {
+      throw new Error('فشل في الاتصال')
+    })
+
+    xhr.open('POST', '/api/drive/upload')
+    xhr.setRequestHeader('Authorization', `Bearer ${accessToken}`)
+    xhr.send(formData)
+  } catch (err) {
+    console.error('Upload error:', err)
   } finally {
     uploading.value = false
   }
