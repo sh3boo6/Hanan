@@ -5,7 +5,7 @@
       :items="menuItems"
       :content="{ align: 'end', side: 'bottom' }"
     >
-      <button class="flex items-center gap-2.5 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors focus:outline-none">
+      <button class="flex items-center gap-2.5 p-1 rounded-full hover:bg-gray-100 transition-colors focus:outline-none">
         <UAvatar
           :src="(user as GoogleUser).picture"
           :alt="(user as GoogleUser).name"
@@ -13,10 +13,10 @@
           class="ring-2 ring-primary-500/20"
         />
         <div class="hidden sm:block text-right">
-          <p class="text-sm font-bold text-gray-900 dark:text-white leading-tight">
+          <p class="text-sm font-bold text-default leading-tight">
             {{ (user as GoogleUser).name }}
           </p>
-          <p class="text-[11px] text-gray-500 dark:text-gray-400">
+          <p class="text-[11px] text-gray-500">
             {{ (user as GoogleUser).email }}
           </p>
         </div>
