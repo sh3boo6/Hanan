@@ -40,7 +40,7 @@
           class="pt-2"
         >
           <UButton
-            to="/auth/google"
+            to="/api/auth/google"
             external
             color="primary"
             size="xl"
