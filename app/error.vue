@@ -36,14 +36,9 @@
 </template>
 
 <script setup lang="ts">
-defineProps<{
-  error: {
-    statusCode: number
-    message?: string
-  }
-}>()
+const error = useError()
 
 useHead({
-  title: computed(() => `${props.error?.statusCode || 404} - خطأ`)
+  title: computed(() => `${error.value?.statusCode || 404} - خطأ`)
 })
 </script>
