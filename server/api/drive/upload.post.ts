@@ -29,51 +29,65 @@ export default defineEventHandler(async (event) => {
   }
 
   const targetFolderId = folderIdItem?.data?.toString('utf-8') || 'root'
-
-  const metadata = {
-    name: fileItem.filename || 'file',
-    mimeType: fileItem.type || 'application/octet-stream',
-    parents: [targetFolderId]
-  }
-
-  // إعداد الـ Boundary بشكل دقيق متوافق مع Google Drive API
-  const boundary = '----WebKitFormBoundary3141592653589793'
-
-  const headerPart = Buffer.from(
-    `--${boundary}\r\n`
-    + 'Content-Type: application/json; charset=UTF-8\r\n\r\n'
-    + `${JSON.stringify(metadata)}\r\n`
-    + `--${boundary}\r\n`
-    + `Content-Type: ${metadata.mimeType}\r\n\r\n`
-  )
-
-  const footerPart = Buffer.from(`\r\n--${boundary}--`)
-
-  // دمج البيانات بالترتيب الصحيح
-  const multipartRequestBody = Buffer.concat([
-    headerPart,
-    fileItem.data,
-    footerPart
-  ])
+  const fileName = fileItem.filename || 'file'
+  const mimeType = fileItem.type || 'application/octet-stream'
 
   try {
-    const response = await $fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
-      method: 'POST',
+    // 1. إنشاء جلسة رفع Resumable للحصول على رابط الرفع المباشر
+    const sessionResponse = await fetch(
+      'https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable',
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json; charset=UTF-8',
+          'X-Upload-Content-Type': mimeType,
+          'X-Upload-Content-Length': fileItem.data.length.toString()
+        },
+        body: JSON.stringify({
+          name: fileName,
+          parents: [targetFolderId]
+        })
+      }
+    )
+
+    if (!sessionResponse.ok) {
+      throw createError({
+        statusCode: sessionResponse.status,
+        statusMessage: 'فشل في إنشاء جلسة رفع الملفات'
+      })
+    }
+
+    // استخراج رابط الرفع التراكمي
+    const uploadUrl = sessionResponse.headers.get('location')
+    if (!uploadUrl) {
+      throw createError({ statusCode: 500, statusMessage: 'لم يتم استلام رابط الرفع' })
+    }
+
+    // 2. إرسال بيانات الملف مباشرة عبر رابط الجلسة
+    const uploadResponse = await fetch(uploadUrl, {
+      method: 'PUT',
       headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': `multipart/related; boundary=${boundary}`,
-        'Content-Length': multipartRequestBody.length.toString()
+        'Content-Type': mimeType,
+        'Content-Length': fileItem.data.length.toString()
       },
-      body: multipartRequestBody
+      body: fileItem.data
     })
 
-    return response
-  } catch (err: unknown) {
-    const errorObj = err as { statusCode?: number, data?: { error?: { message?: string } } }
+    if (!uploadResponse.ok) {
+      throw createError({
+        statusCode: uploadResponse.status,
+        statusMessage: 'فشل أثناء رفع محتوى الملف'
+      })
+    }
 
+    const result = await uploadResponse.json()
+    return result
+  } catch (err: unknown) {
+    const errorObj = err as { statusCode?: number, message?: string }
     throw createError({
       statusCode: errorObj.statusCode || 500,
-      statusMessage: errorObj.data?.error?.message || 'فشل في رفع الملف إلى Google Drive'
+      statusMessage: errorObj.message || 'حدث خطأ غير متوقع أثناء الرفع'
     })
   }
 })
