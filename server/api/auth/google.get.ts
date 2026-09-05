@@ -22,7 +22,7 @@ export default defineOAuthGoogleEventHandler({
       loggedInAt: new Date()
     })
 
-    await sendRedirect(event, '/', false)
+    await sendRedirect(event, '/drive', false)
   },
   async onError(event, error) {
     console.error('Google OAuth error', error)
