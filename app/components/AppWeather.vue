@@ -93,13 +93,13 @@
                 <p class="text-xs font-semibold text-primary-600">
                   الحالة الحالية
                 </p>
-                <h2 class="text-xl font-black text-accented leading-none">
+                <h2 class="text-xl font-black text-gray-600 leading-none">
                   {{ currentTemp }}°م
                 </h2>
-                <p class="text-xs text-accented">
+                <p class="text-xs text-gray-600">
                   تُشعر وكأنها {{ feelsLike }}°م • {{ currentCondition }}
                 </p>
-                <p class="text-[11px] text-accented mt-0.5">
+                <p class="text-[11px] text-gray-600 mt-0.5">
                   {{ weatherData?.city }}
                 </p>
               </div>
