@@ -71,9 +71,6 @@ const props = defineProps<{
   error: NuxtError
 }>()
 
-const config = useRuntimeConfig()
-const appName = computed(() => config.public.appName || 'اسم التطبيق')
-
 const is404 = computed(() => props.error.statusCode === 404)
 
 // Clear error state and navigate back to safety

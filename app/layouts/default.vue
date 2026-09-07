@@ -13,6 +13,11 @@ const items = ref<NavigationMenuItem[]>([
     to: '/todo'
   },
   {
+    label: 'التقويم',
+    icon: 'i-lucide-calendar',
+    to: '/calendar'
+  },
+  {
     label: 'Drive',
     icon: 'i-simple-icons-googledrive',
     to: '/google'
@@ -46,7 +51,6 @@ const isSlideoverOpen = ref(false)
             <LazyAppWeather />
           </ClientOnly>
           <div class="flex items-center gap-2">
-            <AppSearch class="hidden md:flex" />
             <LazyAppShare />
             <UColorModeButton />
             <UserAvatar />
@@ -65,20 +69,21 @@ const isSlideoverOpen = ref(false)
               />
               <template #body>
                 <div class="flex border-b border-default pb-1">
-                  <div class="border-e border-default pe-2 me-3 flex justify-start">
+                  <div class="pe-2 me-3 flex justify-start">
                     <!-- عند الضغط على أي عنصر في القائمة، نقوم بإغلاق السلايدوفر فوراً -->
                     <UNavigationMenu
                       :items="items"
-                      popover
-                      collapsed
-                      orientation="vertical"
-                      class="xl:hidden"
+                      :ui="{
+                        root: 'justify-around py-2',
+                        item: 'py-0',
+                        link: 'flex-col gap-1 px-3',
+                        linkLeadingIcon: 'size-5',
+                        linkLabel: 'text-[10px]/3 font-normal'
+                      }"
+                      class="w-full"
                       @click="isSlideoverOpen = false"
                     />
                   </div>
-                  <ClientOnly>
-                    <LazyAppCalendar />
-                  </ClientOnly>
                 </div>
                 <LazyAppQR class="mt-2" />
               </template>
@@ -114,12 +119,10 @@ const isSlideoverOpen = ref(false)
 
     <!-- Desktop Right Sidebar -->
     <aside class="hidden xl:flex w-80 flex-col bg-accented/20 border-s border-default shrink-0">
-      <div class="flex-1 p-4 pb-1 flex flex-col">
-        <ClientOnly>
-          <LazyAppCalendar />
-        </ClientOnly>
-      </div>
       <USeparator type="dashed" />
+      <div class="py-4 px-3 border-b border-default/40 flex items-center gap-2">
+        <AppSearch class="hidden md:flex" />
+      </div>
       <div class="flex-1 p-4 pt-1">
         <!-- Secondary Sidebar Content -->
         <LazyAppQR />
