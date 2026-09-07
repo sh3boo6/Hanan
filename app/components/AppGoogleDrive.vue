@@ -322,6 +322,14 @@
                     color="neutral"
                     variant="ghost"
                     size="xs"
+                    icon="i-lucide-pencil"
+                    title="إعادة تسمية"
+                    @click="openRenameModal(item)"
+                  />
+                  <UButton
+                    color="neutral"
+                    variant="ghost"
+                    size="xs"
                     icon="i-lucide-share-2"
                     title="خيارات المشاركة"
                     @click="openShareModal(item)"
@@ -456,6 +464,44 @@
                 @click="deleteItem"
               >
                 تأكيد الحذف
+              </UButton>
+            </div>
+          </div>
+        </template>
+      </UModal>
+
+      <UModal
+        v-model:open="isRenameModalOpen"
+        title="إعادة تسمية"
+      >
+        <template #content>
+          <div
+            dir="rtl"
+            class="p-6 space-y-4"
+          >
+            <UInput
+              v-model="newItemName"
+              placeholder="الاسم الجديد"
+              class="w-full"
+              required
+              autofocus
+              @keyup.enter="renameItem"
+            />
+            <div class="flex justify-end gap-2 pt-2">
+              <UButton
+                color="neutral"
+                variant="ghost"
+                @click="isRenameModalOpen = false"
+              >
+                إلغاء
+              </UButton>
+              <UButton
+                color="primary"
+                :loading="renaming"
+                icon="i-lucide-check"
+                @click="renameItem"
+              >
+                حفظ
               </UButton>
             </div>
           </div>
@@ -619,6 +665,12 @@ const creatingFile = ref(false)
 const isDeleteModalOpen = ref(false)
 const itemToDelete = ref<DriveItem | null>(null)
 const deleting = ref(false)
+
+// Rename State
+const isRenameModalOpen = ref(false)
+const itemToRename = ref<DriveItem | null>(null)
+const newItemName = ref('')
+const renaming = ref(false)
 
 // Share State
 const isShareModalOpen = ref(false)
@@ -785,6 +837,45 @@ const openShareModal = (item: DriveItem) => {
   }
 
   isShareModalOpen.value = true
+}
+
+// Rename Logic
+const openRenameModal = (item: DriveItem) => {
+  itemToRename.value = item
+  newItemName.value = item.name
+  isRenameModalOpen.value = true
+}
+
+const renameItem = async () => {
+  if (!itemToRename.value || !newItemName.value.trim()) return
+
+  renaming.value = true
+  try {
+    await $fetch('/api/drive/rename', {
+      method: 'POST',
+      body: {
+        fileId: itemToRename.value.id,
+        name: newItemName.value.trim()
+      }
+    })
+
+    toast.add({
+      title: 'تم إعادة تسمية العنصر بنجاح',
+      color: 'success'
+    })
+
+    isRenameModalOpen.value = false
+    itemToRename.value = null
+    newItemName.value = ''
+    await refreshFiles()
+  } catch {
+    toast.add({
+      title: 'فشل في إعادة تسمية العنصر',
+      color: 'error'
+    })
+  } finally {
+    renaming.value = false
+  }
 }
 
 const saveShareSettings = async () => {
