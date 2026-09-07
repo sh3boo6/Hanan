@@ -69,7 +69,7 @@ const isSlideoverOpen = ref(false)
               />
               <template #body>
                 <div class="flex border-b border-default pb-1">
-                  <div class="pe-2 me-3 flex justify-start">
+                  <div class="pe-2 me-3 flex w-full justify-start">
                     <!-- عند الضغط على أي عنصر في القائمة، نقوم بإغلاق السلايدوفر فوراً -->
                     <UNavigationMenu
                       :items="items"

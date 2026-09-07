@@ -133,6 +133,7 @@
                 <input
                   ref="fileInputRef"
                   type="file"
+                  multiple
                   class="hidden"
                   @change="onFileChange"
                 >
@@ -145,33 +146,57 @@
                     class="size-8 text-accented mx-auto mb-2"
                   />
                   <p class="text-xs font-semibold text-default">
-                    {{ selectedFile ? selectedFile.name : 'اضغط لاختيار ملف للرفع' }}
+                    {{ selectedFiles.length === 0 ? 'اضغط لاختيار ملفات للرفع' : `${selectedFiles.length} ملف مختار` }}
                   </p>
                   <p
-                    v-if="selectedFile"
+                    v-if="selectedFiles.length === 0"
                     class="text-[11px] text-accented mt-1"
                   >
-                    {{ formatFileSize(selectedFile.size) }}
+                    يمكنك اختيار أكثر من ملف
                   </p>
                 </div>
 
                 <div
-                  v-if="selectedFile && !uploading"
-                  class="flex gap-2"
+                  v-if="selectedFiles.length > 0 && !uploading"
+                  class="space-y-2"
                 >
+                  <div class="max-h-40 overflow-y-auto space-y-1">
+                    <div
+                      v-for="(file, index) in selectedFiles"
+                      :key="index"
+                      class="flex items-center justify-between bg-default/5 rounded-lg px-3 py-2 text-xs"
+                    >
+                      <div class="flex items-center gap-2 min-w-0">
+                        <UIcon
+                          name="i-lucide-file"
+                          class="size-4 shrink-0"
+                        />
+                        <span class="truncate">{{ file.name }}</span>
+                        <span class="text-accented">{{ formatFileSize(file.size) }}</span>
+                      </div>
+                      <UButton
+                        size="xs"
+                        color="neutral"
+                        variant="ghost"
+                        icon="i-lucide-x"
+                        @click="removeSelectedFile(index)"
+                      />
+                    </div>
+                  </div>
                   <UButton
                     type="submit"
                     block
                     color="primary"
                     icon="i-lucide-upload"
                   >
-                    تأكيد الرفع
+                    تأكيد رفع {{ selectedFiles.length }} ملف
                   </UButton>
                   <UButton
                     color="neutral"
                     variant="ghost"
+                    block
                     icon="i-lucide-x"
-                    @click="resetSelectedFile"
+                    @click="resetSelectedFiles"
                   />
                 </div>
 
@@ -563,6 +588,7 @@ interface DriveItem {
   modifiedTime: string
   webViewLink: string
   isFolder: boolean
+  permissions?: Array<{ id: string, type: string, role: string }>
 }
 
 const { loggedIn, user, clear } = useUserSession()
@@ -570,12 +596,11 @@ const userPicture = computed(() => (user.value as { picture?: string } | null)?.
 const userName = computed(() => (user.value as { name?: string } | null)?.name)
 
 const fileInputRef = ref<HTMLInputElement | null>(null)
-const selectedFile = ref<File | null>(null)
+const selectedFiles = ref<File[]>([])
 const uploading = ref(false)
 const files = ref<DriveItem[]>([])
 const loading = ref(true)
 const refreshing = ref(false)
-const uploadXhrRef = ref<XMLHttpRequest | null>(null)
 
 // Folder Nav State
 const currentFolderId = ref('root')
@@ -613,19 +638,19 @@ const triggerFileInput = () => {
 
 const onFileChange = (e: Event) => {
   const target = e.target as HTMLInputElement
-  selectedFile.value = target.files?.[0] || null
+  selectedFiles.value = Array.from(target.files || [])
 }
 
-const resetSelectedFile = () => {
-  selectedFile.value = null
+const removeSelectedFile = (index: number) => {
+  selectedFiles.value.splice(index, 1)
+}
+
+const resetSelectedFiles = () => {
+  selectedFiles.value = []
   if (fileInputRef.value) fileInputRef.value.value = ''
 }
 
 const cancelUpload = () => {
-  if (uploadXhrRef.value) {
-    uploadXhrRef.value.abort()
-    uploadXhrRef.value = null
-  }
   uploading.value = false
   uploadProgress.value = 0
   uploadSpeed.value = ''
@@ -746,8 +771,19 @@ const deleteItem = async () => {
 // Share
 const openShareModal = (item: DriveItem) => {
   selectedShareItem.value = item
-  shareAccessType.value = 'restricted'
-  shareRole.value = 'viewer'
+  const anyonePermission = item.permissions?.find(p => p.type === 'anyone')
+
+  if (anyonePermission) {
+    shareAccessType.value = 'anyone'
+    const googleRole = anyonePermission.role
+    if (googleRole === 'writer') shareRole.value = 'editor'
+    else if (googleRole === 'commenter') shareRole.value = 'commenter'
+    else shareRole.value = 'viewer'
+  } else {
+    shareAccessType.value = 'restricted'
+    shareRole.value = 'viewer'
+  }
+
   isShareModalOpen.value = true
 }
 
@@ -797,70 +833,74 @@ const uploadSpeed = ref('')
 const timeRemaining = ref('')
 
 const uploadFile = async () => {
-  if (!selectedFile.value) return
+  if (selectedFiles.value.length === 0) return
   uploading.value = true
   uploadProgress.value = 0
   uploadSpeed.value = ''
   timeRemaining.value = ''
 
   try {
-    const file = selectedFile.value
-
-    // 1. إنشاء جلسة الرفع
-    const { uploadUrl } = await $fetch<{ uploadUrl: string }>('/api/drive/upload?action=create-session', {
-      method: 'POST',
-      body: {
-        name: file.name,
-        mimeType: file.type || 'application/octet-stream',
-        size: file.size,
-        folderId: currentFolderId.value
-      }
-    })
-
-    // 2. رفع الملف على أجزاء بحجم 2MB (لتكون أقل من حد Vercel 4.5MB وتمنع CORS)
-    const CHUNK_SIZE = 2 * 1024 * 1024 // 2 Megabytes
-    const totalSize = file.size
-    let start = 0
+    const totalBytes = selectedFiles.value.reduce((sum, file) => sum + file.size, 0)
+    let uploadedBytes = 0
     const startTime = Date.now()
 
-    while (start < totalSize) {
-      const end = Math.min(start + CHUNK_SIZE, totalSize)
-      const chunk = file.slice(start, end)
-
-      const formData = new FormData()
-      formData.append('chunk', chunk)
-      formData.append('uploadUrl', uploadUrl)
-      formData.append('contentRange', `bytes ${start}-${end - 1}/${totalSize}`)
-
-      // إرسال الجزء إلى سيرفر Nuxt الخالي من قيود CORS
-      await $fetch('/api/drive/upload', {
+    for (const file of selectedFiles.value) {
+      const { uploadUrl } = await $fetch<{ uploadUrl: string }>('/api/drive/upload?action=create-session', {
         method: 'POST',
-        body: formData
+        body: {
+          name: file.name,
+          mimeType: file.type || 'application/octet-stream',
+          size: file.size,
+          folderId: currentFolderId.value
+        }
       })
 
-      start = end
-      uploadProgress.value = Math.round((start / totalSize) * 100)
+      const CHUNK_SIZE = 2 * 1024 * 1024
+      const fileSize = file.size
+      let chunkStart = 0
 
-      const elapsedSeconds = (Date.now() - startTime) / 1000
-      const speed = start / elapsedSeconds
-      const remainingBytes = totalSize - start
-      const remainingSeconds = remainingBytes / speed
+      while (chunkStart < fileSize) {
+        const end = Math.min(chunkStart + CHUNK_SIZE, fileSize)
+        const chunk = file.slice(chunkStart, end)
 
-      uploadSpeed.value = speed > 1024 * 1024
-        ? `${(speed / (1024 * 1024)).toFixed(1)} MB/s`
-        : `${(speed / 1024).toFixed(0)} KB/s`
+        const formData = new FormData()
+        formData.append('chunk', chunk)
+        formData.append('uploadUrl', uploadUrl)
+        formData.append('contentRange', `bytes ${chunkStart}-${end - 1}/${fileSize}`)
 
-      timeRemaining.value = remainingSeconds < 60
-        ? `${Math.ceil(remainingSeconds)} ثانية`
-        : `${Math.ceil(remainingSeconds / 60)} دقيقة`
+        await $fetch('/api/drive/upload', {
+          method: 'POST',
+          body: formData
+        })
+
+        const chunkBytes = end - chunkStart
+        uploadedBytes += chunkBytes
+        chunkStart = end
+
+        uploadProgress.value = Math.round((uploadedBytes / totalBytes) * 100)
+
+        const elapsedSeconds = (Date.now() - startTime) / 1000
+        const speed = elapsedSeconds > 0 ? uploadedBytes / elapsedSeconds : 0
+        const remainingBytes = totalBytes - uploadedBytes
+        const remainingSeconds = speed > 0 ? remainingBytes / speed : 0
+
+        uploadSpeed.value = speed > 1024 * 1024
+          ? `${(speed / (1024 * 1024)).toFixed(1)} MB/s`
+          : `${(speed / 1024).toFixed(0)} KB/s`
+
+        timeRemaining.value = remainingSeconds < 60
+          ? `${Math.ceil(remainingSeconds)} ثانية`
+          : `${Math.ceil(remainingSeconds / 60)} دقيقة`
+      }
     }
 
-    toast.add({ title: 'تم رفع الملف بنجاح', color: 'success' })
-    resetSelectedFile()
+    const uploadedCount = selectedFiles.value.length
+    toast.add({ title: `تم رفع ${uploadedCount} ملف بنجاح`, color: 'success' })
+    resetSelectedFiles()
     await refreshFiles()
   } catch (err) {
     console.error('Chunk Proxy Upload Error:', err)
-    toast.add({ title: 'فشل في رفع الملف، يرجى المحاولة لاحقاً', color: 'error' })
+    toast.add({ title: 'فشل في رفع الملفات، يرجى المحاولة لاحقاً', color: 'error' })
   } finally {
     uploading.value = false
   }
@@ -886,7 +926,8 @@ const refreshFiles = async () => {
       size: String(file.size || '0'),
       modifiedTime: file.modifiedTime || '',
       webViewLink: file.webViewLink || '',
-      isFolder: file.mimeType === 'application/vnd.google-apps.folder'
+      isFolder: file.mimeType === 'application/vnd.google-apps.folder',
+      permissions: (file as { permissions?: Array<{ id: string, type: string, role: string }> }).permissions || []
     }))
   } catch (err) {
     console.error('Failed to fetch files:', err)
