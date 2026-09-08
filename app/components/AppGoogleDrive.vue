@@ -689,6 +689,16 @@
               >
                 نسخ الرابط
               </UButton>
+              <UButton
+                color="neutral"
+                variant="soft"
+                icon="i-lucide-qr-code"
+                size="sm"
+                :disabled="!selectedShareItem?.webViewLink"
+                @click="openQrModal(selectedShareItem?.webViewLink || '')"
+              >
+                رمز QR
+              </UButton>
 
               <div class="flex gap-2">
                 <UButton
@@ -711,6 +721,12 @@
           </div>
         </template>
       </UModal>
+
+      <AppQrModal
+        v-model:open="isQrModalOpen"
+        :text="qrText"
+        title="رمز الاستجابة السريعة للرابط"
+      />
     </div>
   </div>
 </template>
@@ -782,6 +798,14 @@ const selectedShareItem = ref<DriveItem | null>(null)
 const shareAccessType = ref<'restricted' | 'anyone'>('restricted')
 const shareRole = ref<'viewer' | 'commenter' | 'editor'>('viewer')
 const savingShare = ref(false)
+
+const isQrModalOpen = ref(false)
+const qrText = ref('')
+
+const openQrModal = (text: string) => {
+  qrText.value = text || ''
+  isQrModalOpen.value = true
+}
 
 const toast = useToast()
 
