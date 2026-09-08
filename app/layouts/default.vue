@@ -63,7 +63,7 @@ const isSlideoverOpen = ref(false)
             >
               <UButton
                 class="xl:hidden"
-                icon="i-lucide-qr-code"
+                icon="i-lucide-sidebar"
                 color="neutral"
                 variant="ghost"
               />
