@@ -12,15 +12,16 @@ export default defineEventHandler(async (event) => {
     url.searchParams.set('hl', 'ar')
     url.searchParams.set('q', q.trim())
 
-    const response = await fetch(url.toString(), {
+    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url.toString())}`
+
+    const response = await fetch(proxyUrl, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; Hanan/1.0)',
-        'Accept': 'application/json, text/javascript, */*'
+        Accept: 'application/json, text/javascript, */*'
       }
     })
 
     if (!response.ok) {
-      console.error('Google suggestions API responded with status:', response.status)
+      console.error('Proxy responded with status:', response.status)
       return []
     }
 
@@ -29,7 +30,7 @@ export default defineEventHandler(async (event) => {
     try {
       parsed = JSON.parse(text)
     } catch {
-      console.error('Failed to parse Google suggestions response as JSON')
+      console.error('Failed to parse suggestions response')
       return []
     }
 
