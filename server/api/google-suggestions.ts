@@ -6,22 +6,27 @@ export default defineEventHandler(async (event) => {
     return []
   }
 
+  const url = new URL('https://suggestqueries.google.com/complete/search')
+  url.searchParams.set('client', 'firefox')
+  url.searchParams.set('hl', 'ar')
+  url.searchParams.set('q', q.trim())
+
   try {
-    const url = new URL('https://suggestqueries.google.com/complete/search')
-    url.searchParams.set('client', 'firefox')
-    url.searchParams.set('hl', 'ar')
-    url.searchParams.set('q', q.trim())
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 5000)
 
-    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url.toString())}`
-
-    const response = await fetch(proxyUrl, {
+    const response = await fetch(url.toString(), {
       headers: {
-        Accept: 'application/json, text/javascript, */*'
-      }
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'application/json, text/javascript, */*',
+        'Accept-Language': 'ar,en;q=0.9'
+      },
+      signal: controller.signal
     })
 
+    clearTimeout(timeout)
+
     if (!response.ok) {
-      console.error('Proxy responded with status:', response.status)
       return []
     }
 
@@ -30,7 +35,6 @@ export default defineEventHandler(async (event) => {
     try {
       parsed = JSON.parse(text)
     } catch {
-      console.error('Failed to parse suggestions response')
       return []
     }
 
@@ -39,8 +43,7 @@ export default defineEventHandler(async (event) => {
     }
 
     return []
-  } catch (error) {
-    console.error('Failed to fetch Google suggestions:', error)
+  } catch {
     return []
   }
 })
