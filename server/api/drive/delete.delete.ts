@@ -15,19 +15,35 @@ export default defineEventHandler(async (event) => {
   }
 
   const query = getQuery(event)
-  const fileId = query.fileId as string
+  const fileId = query.fileId as string | undefined
 
-  if (!fileId) {
+  if (fileId) {
+    await $fetch(`https://www.googleapis.com/drive/v3/files/${fileId}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${accessToken}`
+      }
+    })
+    return { success: true }
+  }
+
+  const body = await readBody(event)
+  const fileIds = body.fileIds as string[] | undefined
+
+  if (!fileIds || !Array.isArray(fileIds) || fileIds.length === 0) {
     throw createError({ statusCode: 400, statusMessage: 'معرّف الملف مطلوب' })
   }
 
-  // حذف العنصر (ملف أو مجلد) من Google Drive
-  await $fetch(`https://www.googleapis.com/drive/v3/files/${fileId}`, {
-    method: 'DELETE',
-    headers: {
-      Authorization: `Bearer ${accessToken}`
-    }
-  })
+  await Promise.all(
+    fileIds.map(id =>
+      $fetch(`https://www.googleapis.com/drive/v3/files/${id}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${accessToken}`
+        }
+      })
+    )
+  )
 
   return { success: true }
 })

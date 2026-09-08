@@ -230,7 +230,7 @@
 
           <UCard class="lg:col-span-2 border border-default rounded-2xl">
             <template #header>
-              <div class="flex items-center justify-between">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div class="flex items-center gap-1.5 text-sm font-bold text-default">
                   <UIcon
                     name="i-lucide-folder"
@@ -252,13 +252,23 @@
                   </template>
                 </div>
 
-                <UBadge
-                  color="neutral"
-                  variant="subtle"
-                  size="xs"
-                >
-                  {{ files.length }} عنصر
-                </UBadge>
+                <div class="flex items-center gap-2">
+                  <UInput
+                    v-model="searchQuery"
+                    icon="i-lucide-search"
+                    placeholder="بحث في الملفات..."
+                    size="xs"
+                    class="w-full sm:w-48"
+                    :disabled="loading || files.length === 0"
+                  />
+                  <UBadge
+                    color="neutral"
+                    variant="subtle"
+                    size="xs"
+                  >
+                    {{ filteredFiles.length }} عنصر
+                  </UBadge>
+                </div>
               </div>
             </template>
 
@@ -293,31 +303,78 @@
               class="divide-y divide-accented"
             >
               <div
-                v-for="item in files"
+                v-if="selectedCount > 0"
+                class="py-2 px-2 flex items-center justify-between gap-3 bg-primary-500/5 rounded-lg"
+              >
+                <UCheckbox
+                  :model-value="selectedCount === filteredFiles.length && filteredFiles.length > 0"
+                  :indeterminate="selectedCount > 0 && selectedCount < filteredFiles.length"
+                  label="تحديد الكل"
+                  @update:model-value="val => val ? filteredFiles.forEach(f => toggleSelect(f.id)) : clearSelection()"
+                />
+                <div class="flex items-center gap-1.5">
+                  <UButton
+                    size="xs"
+                    color="error"
+                    variant="soft"
+                    icon="i-lucide-trash-2"
+                    @click="confirmBatchDelete"
+                  >
+                    حذف المحدد ({{ selectedCount }})
+                  </UButton>
+                  <UButton
+                    size="xs"
+                    color="neutral"
+                    variant="ghost"
+                    icon="i-lucide-x"
+                    @click="clearSelection"
+                  />
+                </div>
+              </div>
+
+              <div
+                v-for="item in filteredFiles"
                 :key="item.id"
                 class="py-3 px-2 flex items-center justify-between gap-3 hover:bg-accented/80 rounded-lg transition-colors group"
+                :class="{ 'bg-primary-500/5': isSelected(item.id) }"
               >
-                <div
-                  class="flex items-center gap-3 min-w-0 flex-1 cursor-pointer"
-                  @click="item.isFolder ? openFolder(item) : null"
-                >
-                  <div :class="['size-10 rounded-lg flex items-center justify-center shrink-0', item.isFolder ? 'bg-amber-500/10 text-amber-500' : 'bg-primary-500/10 text-primary-500']">
-                    <UIcon
-                      :name="item.isFolder ? 'i-lucide-folder' : getFileIcon(item.mimeType)"
-                      class="size-5"
-                    />
-                  </div>
-                  <div class="min-w-0">
-                    <p class="text-sm font-bold text-default truncate group-hover:text-primary-500 transition-colors">
-                      {{ item.name }}
-                    </p>
-                    <p class="text-[11px] text-accented">
-                      {{ item.isFolder ? 'مجلد' : formatFileSize(Number(item.size)) }} • {{ formatDate(item.modifiedTime) }}
-                    </p>
+                <div class="flex items-center gap-3 min-w-0 flex-1">
+                  <UCheckbox
+                    :model-value="isSelected(item.id)"
+                    @update:model-value="() => toggleSelect(item.id)"
+                    @click.stop
+                  />
+                  <div
+                    class="flex items-center gap-3 min-w-0 flex-1 cursor-pointer"
+                    @click="item.isFolder ? openFolder(item) : null"
+                  >
+                    <div :class="['size-10 rounded-lg flex items-center justify-center shrink-0', item.isFolder ? 'bg-amber-500/10 text-amber-500' : 'bg-primary-500/10 text-primary-500']">
+                      <UIcon
+                        :name="item.isFolder ? 'i-lucide-folder' : getFileIcon(item.mimeType)"
+                        class="size-5"
+                      />
+                    </div>
+                    <div class="min-w-0">
+                      <p class="text-sm font-bold text-default truncate group-hover:text-primary-500 transition-colors">
+                        {{ item.name }}
+                      </p>
+                      <p class="text-[11px] text-accented">
+                        {{ item.isFolder ? 'مجلد' : formatFileSize(Number(item.size)) }} • {{ formatDate(item.modifiedTime) }}
+                      </p>
+                    </div>
                   </div>
                 </div>
 
                 <div class="flex items-center gap-1 shrink-0">
+                  <UButton
+                    v-if="!item.isFolder && item.webViewLink"
+                    color="neutral"
+                    variant="ghost"
+                    size="xs"
+                    icon="i-lucide-download"
+                    title="تنزيل"
+                    @click="downloadFile(item)"
+                  />
                   <UButton
                     color="neutral"
                     variant="ghost"
@@ -428,6 +485,42 @@
               </UButton>
             </div>
           </form>
+        </template>
+      </UModal>
+
+      <UModal
+        v-model:open="isBatchDeleteModalOpen"
+        title="تأكيد حذف متعدد"
+      >
+        <template #content>
+          <div
+            dir="rtl"
+            class="p-6 space-y-4"
+          >
+            <p class="text-sm text-default">
+              هل أنت تأكد من رغبتك في حذف <span class="font-bold text-default">{{ selectedCount }}</span> عنصر؟
+            </p>
+            <p class="text-xs text-red-500">
+              ملاحظة: حذف المجلدات يؤدي إلى حذف كافة العناصر بداخلها.
+            </p>
+            <div class="flex justify-end gap-2 pt-2">
+              <UButton
+                color="neutral"
+                variant="ghost"
+                @click="isBatchDeleteModalOpen = false"
+              >
+                إلغاء
+              </UButton>
+              <UButton
+                color="error"
+                :loading="batchDeleting"
+                icon="i-lucide-trash-2"
+                @click="batchDeleteItems"
+              >
+                تأكيد الحذف
+              </UButton>
+            </div>
+          </div>
         </template>
       </UModal>
 
@@ -651,6 +744,13 @@ const refreshing = ref(false)
 // Folder Nav State
 const currentFolderId = ref('root')
 const currentPath = ref<Array<{ id: string, name: string }>>([])
+const searchQuery = ref('')
+
+const filteredFiles = computed(() => {
+  if (!searchQuery.value.trim()) return files.value
+  const q = searchQuery.value.trim().toLowerCase()
+  return files.value.filter(f => f.name.toLowerCase().includes(q))
+})
 
 // Modals State
 const isCreateFolderOpen = ref(false)
@@ -665,6 +765,10 @@ const creatingFile = ref(false)
 const isDeleteModalOpen = ref(false)
 const itemToDelete = ref<DriveItem | null>(null)
 const deleting = ref(false)
+
+const isBatchDeleteModalOpen = ref(false)
+const selectedItemIds = ref<Set<string>>(new Set())
+const batchDeleting = ref(false)
 
 // Rename State
 const isRenameModalOpen = ref(false)
@@ -737,12 +841,16 @@ const getFileIcon = (mimeType: string): string => {
 const openFolder = (folder: DriveItem) => {
   currentFolderId.value = folder.id
   currentPath.value.push({ id: folder.id, name: folder.name })
+  searchQuery.value = ''
+  clearSelection()
   refreshFiles()
 }
 
 const navigateToDirectory = (folderId: string) => {
   currentFolderId.value = folderId
   currentPath.value = []
+  searchQuery.value = ''
+  clearSelection()
   refreshFiles()
 }
 
@@ -751,6 +859,8 @@ const navigateToPathIndex = (index: number) => {
   if (!targetFolder) return
   currentFolderId.value = targetFolder.id
   currentPath.value = currentPath.value.slice(0, index + 1)
+  searchQuery.value = ''
+  clearSelection()
   refreshFiles()
 }
 
@@ -787,6 +897,21 @@ const createFile = async () => {
   }
 }
 
+const selectedCount = computed(() => selectedItemIds.value.size)
+
+const toggleSelect = (id: string) => {
+  const set = new Set(selectedItemIds.value)
+  if (set.has(id)) set.delete(id)
+  else set.add(id)
+  selectedItemIds.value = set
+}
+
+const isSelected = (id: string) => selectedItemIds.value.has(id)
+
+const clearSelection = () => {
+  selectedItemIds.value = new Set()
+}
+
 // Delete Logic
 const confirmDelete = (item: DriveItem) => {
   itemToDelete.value = item
@@ -809,6 +934,7 @@ const deleteItem = async () => {
 
     isDeleteModalOpen.value = false
     itemToDelete.value = null
+    clearSelection()
     await refreshFiles()
   } catch {
     toast.add({
@@ -817,6 +943,40 @@ const deleteItem = async () => {
     })
   } finally {
     deleting.value = false
+  }
+}
+
+const confirmBatchDelete = () => {
+  if (selectedCount.value === 0) return
+  isBatchDeleteModalOpen.value = true
+}
+
+const batchDeleteItems = async () => {
+  if (selectedCount.value === 0) return
+
+  batchDeleting.value = true
+  try {
+    const ids = Array.from(selectedItemIds.value)
+    await $fetch('/api/drive/delete', {
+      method: 'DELETE',
+      body: { fileIds: ids }
+    })
+
+    toast.add({
+      title: `تم حذف ${ids.length} عنصر بنجاح`,
+      color: 'success'
+    })
+
+    isBatchDeleteModalOpen.value = false
+    clearSelection()
+    await refreshFiles()
+  } catch {
+    toast.add({
+      title: 'فشل في حذف العناصر المحددة',
+      color: 'error'
+    })
+  } finally {
+    batchDeleting.value = false
   }
 }
 
@@ -916,6 +1076,23 @@ const copyShareLink = (link: string) => {
     title: 'تم نسخ الرابط بنجاح!',
     color: 'success'
   })
+}
+
+const downloadFile = async (item: DriveItem) => {
+  if (item.isFolder) return
+  try {
+    const url = `/api/drive/download?fileId=${item.id}`
+    const a = document.createElement('a')
+    a.href = url
+    a.download = item.name
+    a.target = '_blank'
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    toast.add({ title: 'تم بدء تنزيل الملف', color: 'success' })
+  } catch {
+    toast.add({ title: 'فشل في تنزيل الملف', color: 'error' })
+  }
 }
 
 // Upload & Fetch

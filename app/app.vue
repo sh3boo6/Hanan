@@ -13,6 +13,11 @@ useHead({
   }
 })
 
+const handleGlobalRefresh = async () => {
+  // refreshNuxtData تعيد جلب كافة بيانات asyncData / useFetch في الصفحة الحالية
+  await refreshNuxtData()
+}
+
 const toaster = { position: 'top-right' }
 
 const title = config.public.appName
@@ -33,12 +38,14 @@ useSeoMeta({
     :locale="ar"
     :toaster="toaster"
   >
-    <NuxtLoadingIndicator
-      color="var(--ui-primary)"
-      error-color="var(--ui-error)"
-      :height="3"
-    />
-    <NuxtLayout />
-    <ScrollToTop />
+    <PullToRefresh :on-refresh="handleGlobalRefresh">
+      <NuxtLoadingIndicator
+        color="var(--ui-primary)"
+        error-color="var(--ui-error)"
+        :height="3"
+      />
+      <NuxtLayout />
+      <ScrollToTop />
+    </PullToRefresh>
   </UApp>
 </template>
