@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, watch } from 'vue'
+import { ref, watch } from 'vue'
 import QRCode from 'qrcode'
 
 const props = defineProps<{
@@ -12,24 +12,24 @@ const emit = defineEmits<{
   'update:open': [value: boolean]
 }>()
 
-const qrDataUrl = computed({
-  get: () => props.open ? '' : '',
-  set: () => {}
-})
+const qrDataUrl = ref('')
+const generating = ref(false)
 
 watch(
   () => [props.open, props.text] as const,
-  async ([open, text], old) => {
-    if (open && text && (!old || old[0] !== open || old[1] !== text)) {
-      try {
-        const url = await QRCode.toDataURL(text, { width: 300, margin: 2 })
-        qrDataUrl.value = url
-      } catch {
-        qrDataUrl.value = ''
-      }
+  async ([open, text]) => {
+    if (!open || !text) return
+    generating.value = true
+    qrDataUrl.value = ''
+    try {
+      const url = await QRCode.toDataURL(text, { width: 300, margin: 2 })
+      qrDataUrl.value = url
+    } catch {
+      qrDataUrl.value = ''
+    } finally {
+      generating.value = false
     }
-  },
-  { immediate: true }
+  }
 )
 
 const save = () => {
@@ -62,7 +62,9 @@ const save = () => {
             v-else
             class="h-60 w-60 flex items-center justify-center text-muted"
           >
-            جاري التوليد...
+            <template v-if="generating">
+              جاري التوليد...
+            </template>
           </div>
         </div>
         <div class="flex items-center gap-2">
