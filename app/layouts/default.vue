@@ -111,7 +111,7 @@ const isSlideoverOpen = ref(false)
           <span class="flex items-center gap-1">
             <AppName class="font-semibold" /> {{ new Date().getFullYear() }} &copy;
           </span>
-          <span class="hidden xl:inline text-xs opacity-75">| هذه النسخة تجريبية - الإصدار 1.0.0</span>
+          <span class="hidden xl:inline text-xs opacity-75">| الإصدار 2.1.0</span>
           <AppLogo class="w-8 inline ms-0.5 align-middle" />
         </div>
       </footer>

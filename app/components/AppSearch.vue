@@ -1,26 +1,43 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
+import { useDebounceFn } from '@vueuse/core' // متوفرة تلقائياً أو عبر vueuse
 
 const searchQuery = ref('')
 const suggestions = ref<string[]>([])
 const isOpen = ref(false)
+const isLoading = ref(false)
 
-watch(searchQuery, async (newQuery) => {
-  if (!newQuery || newQuery.trim().length === 0) {
+// دالة جلب الاقتراحات من السيرفر
+const fetchSuggestions = useDebounceFn(async (query: string) => {
+  if (!query || query.trim().length === 0) {
+    suggestions.value = []
+    isOpen.value = false
+    isLoading.value = false
+    return
+  }
+
+  try {
+    const data = await $fetch<string[]>('/api/google-suggestions', {
+      params: { q: query.trim() }
+    })
+    suggestions.value = data
+    isOpen.value = data.length > 0
+  } catch {
+    suggestions.value = []
+    isOpen.value = false
+  } finally {
+    isLoading.value = false
+  }
+}, 300) // تأخير 300 ملي ثانية لتقليل الطلبات أثناء الكتابة السريعة
+
+watch(searchQuery, (newQuery) => {
+  if (!newQuery.trim()) {
     suggestions.value = []
     isOpen.value = false
     return
   }
-
-  const query = newQuery.trim()
-  suggestions.value = [
-    query,
-    `${query} 2026`,
-    `${query} في السعودية`,
-    `موقع ${query}`,
-    `أفضل ${query}`
-  ]
-  isOpen.value = true
+  isLoading.value = true
+  fetchSuggestions(newQuery)
 })
 
 const handleFocus = () => {
@@ -59,7 +76,13 @@ const onSearchSubmit = () => {
         class="w-full block border-0 p-0 focus:ring-0"
         @focus="handleFocus"
       />
+      <UIcon
+        v-if="isLoading"
+        name="i-lucide-loader-2"
+        class="w-4 h-4 text-muted animate-spin shrink-0"
+      />
       <UButton
+        v-else
         type="submit"
         icon="i-lucide-search"
         color="neutral"
