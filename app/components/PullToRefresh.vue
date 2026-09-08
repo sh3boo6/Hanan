@@ -1,67 +1,68 @@
 <script setup lang="ts">
+import { ref, computed } from 'vue'
+
 const props = defineProps<{
   onRefresh: () => Promise<void>
   pullThreshold?: number
+  maxPull?: number
 }>()
 
-const threshold = props.pullThreshold || 70
+const threshold = props.pullThreshold || 80
+const maxPull = props.maxPull || 140
 const pullDistance = ref(0)
 const isRefreshing = ref(false)
-const isShaking = ref(false)
 const startY = ref(0)
-const hasVibrated = ref(false)
+const isPulling = ref(false)
+const canStart = ref(true)
 
-// تشغيل اهتزاز الجهاز عند تجاوز العتبة
+const clamp = (v: number, min: number, max: number) => Math.max(min, Math.min(v, max))
+
+const canTrigger = () => {
+  return canStart.value && !isRefreshing.value && window.scrollY <= 0
+}
+
 const triggerHaptic = () => {
   if ('navigator' in window && navigator.vibrate) {
-    // اهتزاز قصير وخفيف مثل نظام iOS
-    navigator.vibrate(15)
+    navigator.vibrate(10)
   }
 }
 
 const handleTouchStart = (e: TouchEvent) => {
-  if (window.scrollY === 0) {
-    const touch = e.touches[0]
-    if (!touch) return
-
-    startY.value = touch.clientY
-    hasVibrated.value = false
-  }
+  if (!canTrigger()) return
+  const touch = e.touches[0]
+  if (!touch) return
+  startY.value = touch.clientY
+  isPulling.value = true
 }
 
 const handleTouchMove = (e: TouchEvent) => {
-  if (startY.value === 0 || isRefreshing.value) return
-
+  if (!isPulling.value || isRefreshing.value) return
   const touch = e.touches[0]
   if (!touch) return
 
-  const currentY = touch.clientY
-  const deltaY = currentY - startY.value
+  const deltaY = touch.clientY - startY.value
+  if (deltaY <= 0) {
+    pullDistance.value = 0
+    return
+  }
 
-  if (deltaY > 0 && window.scrollY === 0) {
-    pullDistance.value = Math.pow(deltaY, 0.85)
+  const resisted = Math.pow(deltaY, 0.78)
+  pullDistance.value = clamp(resisted, 0, maxPull)
 
-    // اهتزاز لمسي عند الوصول للحد الأدنى للسحب
-    if (pullDistance.value >= threshold && !hasVibrated.value) {
+  if (pullDistance.value >= threshold) {
+    if (!navigator.vibrate) {
       triggerHaptic()
-      hasVibrated.value = true
-    } else if (pullDistance.value < threshold) {
-      hasVibrated.value = false
     }
   }
 }
 
 const handleTouchEnd = async () => {
+  if (!isPulling.value) return
+  isPulling.value = false
+
   if (pullDistance.value >= threshold && !isRefreshing.value) {
     isRefreshing.value = true
     pullDistance.value = threshold
-
-    // تفعيل حركة اهتزاز الشاشة البصرية
-    isShaking.value = true
-    // ✅ تصحيح: توزيع الأوامر على أسطر منفصلة لتجاوز خطأ ESLint
-    setTimeout(() => {
-      isShaking.value = false
-    }, 300)
 
     try {
       await props.onRefresh()
@@ -75,47 +76,77 @@ const handleTouchEnd = async () => {
     startY.value = 0
   }
 }
+
+const handleTouchCancel = () => {
+  isPulling.value = false
+  pullDistance.value = 0
+  startY.value = 0
+}
+
+const handleWheel = (e: WheelEvent) => {
+  if (!isPulling.value && window.scrollY <= 0 && e.deltaY < 0) {
+    e.preventDefault()
+  }
+}
+
+const indicatorOpacity = computed(() => {
+  if (isRefreshing.value) return 1
+  return clamp(pullDistance.value / threshold, 0, 1)
+})
+
+const indicatorTranslate = computed(() => {
+  if (isRefreshing.value) return 8
+  return pullDistance.value - 40
+})
+
+const contentTranslate = computed(() => {
+  if (!isRefreshing.value && pullDistance.value < threshold) return 0
+  return isRefreshing.value ? threshold : pullDistance.value
+})
+
+const showIndicator = computed(() => pullDistance.value > 0 || isRefreshing.value)
+
+const isReached = computed(() => pullDistance.value >= threshold && !isRefreshing.value)
 </script>
 
 <template>
   <div
-    class="relative overflow-hidden touch-pan-y"
-    @touchstart="handleTouchStart"
-    @touchmove="handleTouchMove"
+    class="relative"
+    @touchstart.passive="handleTouchStart"
+    @touchmove.passive="handleTouchMove"
     @touchend="handleTouchEnd"
+    @touchcancel="handleTouchCancel"
+    @wheel="handleWheel"
   >
-    <!-- مؤشر السحب -->
     <div
-      class="absolute left-0 right-0 top-0 flex items-center justify-center transition-transform duration-200 ease-out z-10"
+      v-if="showIndicator"
+      class="fixed left-0 right-0 top-0 flex items-center justify-center z-50 pointer-events-none"
       :style="{
-        transform: `translateY(${isRefreshing ? 16 : pullDistance - 40}px)`,
-        opacity: Math.min(pullDistance / threshold, 1)
+        transform: `translateY(${indicatorTranslate}px)`,
+        opacity: indicatorOpacity
       }"
     >
       <div
-        class="p-2 rounded-full bg-background/80 backdrop-blur-md shadow-md flex items-center justify-center"
-        :class="{ 'animate-shake': isShaking }"
+        class="p-2 rounded-full bg-background/90 backdrop-blur shadow-lg flex items-center justify-center"
       >
         <UIcon
           v-if="isRefreshing"
-          name="i-heroicons-arrow-path"
-          class="w-6 h-6 text-primary animate-spin"
+          name="i-lucide-loader-2"
+          class="w-5 h-5 text-primary animate-spin"
         />
         <UIcon
           v-else
-          name="i-heroicons-arrow-down"
-          class="w-6 h-6 text-gray-500 transition-transform duration-150"
-          :class="{ 'rotate-180 text-primary': pullDistance >= threshold }"
+          name="i-lucide-arrow-down"
+          class="w-5 h-5 transition-all duration-150"
+          :class="{ 'rotate-180 text-primary': isReached }"
         />
       </div>
     </div>
 
-    <!-- محتوى الصفحة مع حركة الاهتزاز -->
     <div
-      class="transition-transform duration-200 ease-out"
-      :class="{ 'animate-shake': isShaking }"
+      class="transition-transform duration-200 ease-out will-change-transform"
       :style="{
-        transform: `translateY(${isRefreshing ? threshold : pullDistance}px)`
+        transform: `translateY(${contentTranslate}px)`
       }"
     >
       <slot />
@@ -124,14 +155,12 @@ const handleTouchEnd = async () => {
 </template>
 
 <style scoped>
-/* إضافة كلاس اهتزاز CSS */
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  20%, 60% { transform: translateX(-3px); }
-  40%, 80% { transform: translateX(3px); }
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
-.animate-shake {
-  animation: shake 0.25s ease-in-out;
+.animate-spin {
+  animation: spin 0.8s linear infinite;
 }
 </style>
