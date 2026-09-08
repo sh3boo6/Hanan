@@ -1,7 +1,7 @@
 <template>
   <div
     dir="rtl"
-    class="w-full min-h-[85vh] flex flex-col justify-center py-10 px-4 sm:px-6 lg:px-8"
+    class="w-full flex flex-col justify-center py-10 px-4 sm:px-6 lg:px-8"
   >
     <div class="max-w-6xl w-full mx-auto space-y-8">
       <div class="text-center space-y-4 max-w-3xl mx-auto">
@@ -17,7 +17,7 @@
           />
           مساحتك السحابية الخاصة
         </UBadge>
-        <h1 class="text-3xl sm:text-5xl font-black tracking-tight">
+        <h1 class="text-2xl sm:text-5xl font-black tracking-tight">
           <div>
             إدارة ملفاتك ومجلداتك عبر
           </div>
