@@ -109,8 +109,15 @@ export default defineNuxtConfig({
         { src: '/icons/ios/180.png', sizes: '180x180', type: 'image/png', purpose: 'apple touch icon' }
       ]
     },
+    registerType: 'prompt',
     workbox: {
-      navigateFallback: '/'
+      navigateFallback: '/',
+      runtimeCaching: [
+        {
+          urlPattern: /^\/api\/auth/,
+          handler: 'NetworkOnly'
+        }
+      ]
     },
     devOptions: {
       enabled: false

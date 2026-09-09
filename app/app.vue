@@ -1,7 +1,9 @@
 <script setup>
 import { ar } from '@nuxt/ui/locale'
+import { useAuthRestore } from '~/composables/useAuthRestore'
 
 const config = useRuntimeConfig()
+const { restore } = useAuthRestore()
 
 useHead({
   meta: [
@@ -14,7 +16,6 @@ useHead({
 })
 
 const handleGlobalRefresh = async () => {
-  // refreshNuxtData تعيد جلب كافة بيانات asyncData / useFetch في الصفحة الحالية
   await refreshNuxtData()
 }
 
@@ -31,6 +32,10 @@ useSeoMeta({
   ogImage: '/img/logo.png',
   twitterCard: 'summary_large_image'
 })
+
+onMounted(async () => {
+  await restore()
+})
 </script>
 
 <template>
@@ -45,6 +50,7 @@ useSeoMeta({
         :height="3"
       />
       <NuxtLayout />
+      <AppUpdate />
       <ScrollToTop />
     </PullToRefresh>
   </UApp>
