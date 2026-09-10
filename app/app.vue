@@ -15,10 +15,6 @@ useHead({
   }
 })
 
-const handleGlobalRefresh = async () => {
-  await refreshNuxtData()
-}
-
 const toaster = { position: 'top-right' }
 
 const title = config.public.appName
@@ -43,7 +39,6 @@ onMounted(async () => {
     :locale="ar"
     :toaster="toaster"
   >
-    <!-- <PullToRefresh :on-refresh="handleGlobalRefresh"> -->
     <NuxtLoadingIndicator
       color="var(--ui-primary)"
       error-color="var(--ui-error)"
@@ -52,6 +47,5 @@ onMounted(async () => {
     <NuxtLayout />
     <AppUpdate />
     <ScrollToTop />
-    <!-- </PullToRefresh> -->
   </UApp>
 </template>

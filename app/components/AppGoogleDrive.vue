@@ -113,7 +113,7 @@
                 >
                   مجلد جديد
                 </UButton>
-                <UButton
+                <!-- <UButton
                   color="primary"
                   variant="soft"
                   icon="i-lucide-file-plus"
@@ -121,7 +121,7 @@
                   @click="isCreateFileOpen = true"
                 >
                   ملف نصي جديد
-                </UButton>
+                </UButton> -->
               </div>
             </UCard>
 
