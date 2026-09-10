@@ -103,24 +103,14 @@
                   إجراءات سريعة
                 </h3>
               </template>
-              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2">
+              <div class="grid grid-cols-1 gap-2">
                 <UButton
                   color="primary"
                   variant="soft"
                   icon="i-lucide-folder-plus"
-                  block
                   @click="isCreateFolderOpen = true"
                 >
                   مجلد جديد
-                </UButton>
-                <UButton
-                  color="primary"
-                  variant="soft"
-                  icon="i-lucide-file-plus"
-                  block
-                  @click="isCreateFileOpen = true"
-                >
-                  ملف نصي جديد
                 </UButton>
               </div>
             </UCard>
@@ -241,10 +231,10 @@
           <UCard class="lg:col-span-2 border border-default rounded-2xl">
             <template #header>
               <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div class="flex items-center gap-1.5 text-sm font-bold text-default flex-wrap">
+                <div class="flex items-center gap-1.5 text-sm font-bold text-default">
                   <UIcon
                     name="i-lucide-folder"
-                    class="size-5 text-amber-500 shrink-0"
+                    class="size-5 text-amber-500"
                   />
                   <span
                     class="cursor-pointer hover:underline"
@@ -313,18 +303,16 @@
               class="divide-y divide-accented"
             >
               <div
-                class="py-2 px-2 flex items-center justify-between gap-3 bg-primary-500/5 rounded-lg mb-2"
+                v-if="selectedCount > 0"
+                class="py-2 px-2 flex items-center justify-between gap-3 bg-primary-500/5 rounded-lg"
               >
                 <UCheckbox
-                  :model-value="isAllSelected"
-                  :indeterminate="isIndeterminate"
+                  :model-value="selectedCount === filteredFiles.length && filteredFiles.length > 0"
+                  :indeterminate="selectedCount > 0 && selectedCount < filteredFiles.length"
                   label="تحديد الكل"
-                  @update:model-value="toggleSelectAll"
+                  @update:model-value="val => val ? filteredFiles.forEach(f => toggleSelect(f.id)) : clearSelection()"
                 />
-                <div
-                  v-if="selectedCount > 0"
-                  class="flex items-center gap-1.5"
-                >
+                <div class="flex items-center gap-1.5">
                   <UButton
                     size="xs"
                     color="error"
@@ -378,18 +366,50 @@
                 </div>
 
                 <div class="flex items-center gap-1 shrink-0">
-                  <UDropdownMenu
-                    :items="getItemMenuActions(item)"
-                    :content="{ align: 'end', side: 'bottom' }"
+                  <UButton
+                    v-if="!item.isFolder && item.webViewLink"
+                    color="neutral"
+                    variant="ghost"
+                    size="xs"
+                    icon="i-lucide-download"
+                    title="تنزيل"
+                    @click="downloadFile(item)"
+                  />
+                  <UButton
+                    color="neutral"
+                    variant="ghost"
+                    size="xs"
+                    icon="i-lucide-pencil"
+                    title="إعادة تسمية"
+                    @click="openRenameModal(item)"
+                  />
+                  <UButton
+                    color="neutral"
+                    variant="ghost"
+                    size="xs"
+                    icon="i-lucide-share-2"
+                    title="خيارات المشاركة"
+                    @click="openShareModal(item)"
+                  />
+                  <UButton
+                    v-if="item.webViewLink"
+                    :to="item.webViewLink"
+                    target="_blank"
+                    color="primary"
+                    variant="subtle"
+                    size="xs"
+                    icon="i-lucide-external-link"
                   >
-                    <UButton
-                      color="neutral"
-                      variant="ghost"
-                      size="xs"
-                      icon="i-lucide-more-vertical"
-                      title="خيارات العنصر"
-                    />
-                  </UDropdownMenu>
+                    فتح
+                  </UButton>
+                  <UButton
+                    color="error"
+                    variant="ghost"
+                    size="xs"
+                    icon="i-lucide-trash-2"
+                    title="حذف العنصر"
+                    @click="confirmDelete(item)"
+                  />
                 </div>
               </div>
             </div>
@@ -445,7 +465,6 @@
             <UInput
               v-model="newFileName"
               placeholder="اسم الملف (مثال: document.txt)"
-              class="w-full"
               required
               autofocus
             />
@@ -660,28 +679,26 @@
               </div>
             </div>
 
-            <div class="flex items-center justify-between pt-2 border-t border-gray-100 flex-wrap gap-2">
-              <div class="flex gap-2">
-                <UButton
-                  color="neutral"
-                  variant="soft"
-                  icon="i-lucide-copy"
-                  size="sm"
-                  @click="copyShareLink(selectedShareItem?.webViewLink || '')"
-                >
-                  نسخ الرابط
-                </UButton>
-                <UButton
-                  color="neutral"
-                  variant="soft"
-                  icon="i-lucide-qr-code"
-                  size="sm"
-                  :disabled="!selectedShareItem?.webViewLink"
-                  @click="openQrModal(selectedShareItem?.webViewLink || '')"
-                >
-                  رمز QR
-                </UButton>
-              </div>
+            <div class="flex items-center justify-between pt-2 border-t border-gray-100">
+              <UButton
+                color="neutral"
+                variant="soft"
+                icon="i-lucide-copy"
+                size="sm"
+                @click="copyShareLink(selectedShareItem?.webViewLink || '')"
+              >
+                نسخ الرابط
+              </UButton>
+              <UButton
+                color="neutral"
+                variant="soft"
+                icon="i-lucide-qr-code"
+                size="sm"
+                :disabled="!selectedShareItem?.webViewLink"
+                @click="openQrModal(selectedShareItem?.webViewLink || '')"
+              >
+                رمز QR
+              </UButton>
 
               <div class="flex gap-2">
                 <UButton
@@ -716,7 +733,7 @@
 
 <script setup lang="ts">
 import { computed, ref, onMounted } from 'vue'
-import { useUserSession, useToast, $fetch } from '#imports'
+import { useUserSession } from '#imports'
 
 interface DriveItem {
   id: string
@@ -726,54 +743,12 @@ interface DriveItem {
   modifiedTime: string
   webViewLink: string
   isFolder: boolean
-  permissions?: DrivePermission[]
-}
-
-interface DrivePermission {
-  id: string
-  type: string
-  role: string
-}
-
-interface DriveApiFile {
-  id: string
-  name: string
-  mimeType: string
-  size?: string | number
-  modifiedTime?: string
-  webViewLink?: string
-  permissions?: DrivePermission[]
-}
-
-interface DriveFilesResponse {
-  files?: DriveApiFile[]
-}
-
-interface DriveUser {
-  picture?: string
-  name?: string
-  email?: string
-}
-
-interface FolderPathItem {
-  id: string
-  name: string
-}
-
-interface UploadSessionResponse {
-  uploadUrl: string
-}
-
-interface ItemMenuAction {
-  label: string
-  icon: string
-  onSelect: () => void
-  color?: 'neutral' | 'primary' | 'secondary' | 'success' | 'info' | 'warning' | 'error'
+  permissions?: Array<{ id: string, type: string, role: string }>
 }
 
 const { loggedIn, user, clear } = useUserSession()
-const userPicture = computed(() => (user.value as DriveUser | null)?.picture)
-const userName = computed(() => (user.value as DriveUser | null)?.name)
+const userPicture = computed(() => (user.value as { picture?: string } | null)?.picture)
+const userName = computed(() => (user.value as { name?: string } | null)?.name)
 
 const fileInputRef = ref<HTMLInputElement | null>(null)
 const selectedFiles = ref<File[]>([])
@@ -784,7 +759,7 @@ const refreshing = ref(false)
 
 // Folder Nav State
 const currentFolderId = ref('root')
-const currentPath = ref<FolderPathItem[]>([])
+const currentPath = ref<Array<{ id: string, name: string }>>([])
 const searchQuery = ref('')
 
 const filteredFiles = computed(() => {
@@ -827,46 +802,39 @@ const savingShare = ref(false)
 const isQrModalOpen = ref(false)
 const qrText = ref('')
 
-let activeUploadController: AbortController | null = null
-
-const openQrModal = (text: string): void => {
+const openQrModal = (text: string) => {
   qrText.value = text || ''
   isQrModalOpen.value = true
 }
 
 const toast = useToast()
 
-const triggerFileInput = (): void => {
+const triggerFileInput = () => {
   if (fileInputRef.value) {
     fileInputRef.value.value = ''
     fileInputRef.value.click()
   }
 }
 
-const onFileChange = (e: Event): void => {
+const onFileChange = (e: Event) => {
   const target = e.target as HTMLInputElement
   selectedFiles.value = Array.from(target.files || [])
 }
 
-const removeSelectedFile = (index: number): void => {
+const removeSelectedFile = (index: number) => {
   selectedFiles.value.splice(index, 1)
 }
 
-const resetSelectedFiles = (): void => {
+const resetSelectedFiles = () => {
   selectedFiles.value = []
   if (fileInputRef.value) fileInputRef.value.value = ''
 }
 
-const cancelUpload = (): void => {
-  if (activeUploadController) {
-    activeUploadController.abort()
-    activeUploadController = null
-  }
+const cancelUpload = () => {
   uploading.value = false
   uploadProgress.value = 0
   uploadSpeed.value = ''
   timeRemaining.value = ''
-  toast.add({ title: 'تم إلغاء عملية الرفع', color: 'neutral' })
 }
 
 const formatFileSize = (bytes: number): string => {
@@ -894,7 +862,7 @@ const getFileIcon = (mimeType: string): string => {
 }
 
 // Nav
-const openFolder = (folder: DriveItem): void => {
+const openFolder = (folder: DriveItem) => {
   currentFolderId.value = folder.id
   currentPath.value.push({ id: folder.id, name: folder.name })
   searchQuery.value = ''
@@ -902,7 +870,7 @@ const openFolder = (folder: DriveItem): void => {
   refreshFiles()
 }
 
-const navigateToDirectory = (folderId: string): void => {
+const navigateToDirectory = (folderId: string) => {
   currentFolderId.value = folderId
   currentPath.value = []
   searchQuery.value = ''
@@ -910,7 +878,7 @@ const navigateToDirectory = (folderId: string): void => {
   refreshFiles()
 }
 
-const navigateToPathIndex = (index: number): void => {
+const navigateToPathIndex = (index: number) => {
   const targetFolder = currentPath.value[index]
   if (!targetFolder) return
   currentFolderId.value = targetFolder.id
@@ -920,92 +888,8 @@ const navigateToPathIndex = (index: number): void => {
   refreshFiles()
 }
 
-// Selection Logic
-const selectedCount = computed(() => selectedItemIds.value.size)
-
-const isAllSelected = computed(() => {
-  if (filteredFiles.value.length === 0) return false
-  return filteredFiles.value.every(f => selectedItemIds.value.has(f.id))
-})
-
-const isIndeterminate = computed(() => {
-  const count = filteredFiles.value.filter(f => selectedItemIds.value.has(f.id)).length
-  return count > 0 && count < filteredFiles.value.length
-})
-
-const toggleSelectAll = (val: boolean | 'indeterminate'): void => {
-  const set = new Set(selectedItemIds.value)
-  if (val === true) {
-    filteredFiles.value.forEach(f => set.add(f.id))
-  } else {
-    filteredFiles.value.forEach(f => set.delete(f.id))
-  }
-  selectedItemIds.value = set
-}
-
-const toggleSelect = (id: string): void => {
-  const set = new Set(selectedItemIds.value)
-  if (set.has(id)) set.delete(id)
-  else set.add(id)
-  selectedItemIds.value = set
-}
-
-const isSelected = (id: string): boolean => selectedItemIds.value.has(id)
-
-const clearSelection = (): void => {
-  selectedItemIds.value = new Set()
-}
-
-// Actions Menu Generator for Nuxt UI v3 DropdownMenu
-const getItemMenuActions = (item: DriveItem): ItemMenuAction[] => {
-  const actions: ItemMenuAction[] = []
-
-  const group1: typeof actions = []
-
-  if (item.webViewLink) {
-    group1.push({
-      label: 'فتح في نافذة جديدة',
-      icon: 'i-lucide-external-link',
-      onSelect: () => window.open(item.webViewLink, '_blank')
-    })
-  }
-
-  if (!item.isFolder && item.webViewLink) {
-    group1.push({
-      label: 'تنزيل الملف',
-      icon: 'i-lucide-download',
-      onSelect: () => downloadFile(item)
-    })
-  }
-
-  group1.push({
-    label: 'خيارات المشاركة',
-    icon: 'i-lucide-share-2',
-    onSelect: () => openShareModal(item)
-  })
-
-  group1.push({
-    label: 'إعادة تسمية',
-    icon: 'i-lucide-pencil',
-    onSelect: () => openRenameModal(item)
-  })
-
-  if (group1.length > 0) {
-    actions.push(...group1)
-  }
-
-  actions.push({
-    label: 'حذف',
-    icon: 'i-lucide-trash-2',
-    color: 'error',
-    onSelect: () => confirmDelete(item)
-  })
-
-  return actions
-}
-
 // Create
-const createFolder = async (): Promise<void> => {
+const createFolder = async () => {
   if (!newFolderName.value) return
   creatingFolder.value = true
   try {
@@ -1013,18 +897,15 @@ const createFolder = async (): Promise<void> => {
       method: 'POST',
       body: { name: newFolderName.value, type: 'folder', folderId: currentFolderId.value }
     })
-    toast.add({ title: 'تم إنشاء المجلد بنجاح', color: 'success' })
     newFolderName.value = ''
     isCreateFolderOpen.value = false
     await refreshFiles()
-  } catch {
-    toast.add({ title: 'فشل في إنشاء المجلد', color: 'error' })
   } finally {
     creatingFolder.value = false
   }
 }
 
-const createFile = async (): Promise<void> => {
+const createFile = async () => {
   if (!newFileName.value) return
   creatingFile.value = true
   try {
@@ -1032,24 +913,36 @@ const createFile = async (): Promise<void> => {
       method: 'POST',
       body: { name: newFileName.value, type: 'file', folderId: currentFolderId.value }
     })
-    toast.add({ title: 'تم إنشاء الملف بنجاح', color: 'success' })
     newFileName.value = ''
     isCreateFileOpen.value = false
     await refreshFiles()
-  } catch {
-    toast.add({ title: 'فشل في إنشاء الملف', color: 'error' })
   } finally {
     creatingFile.value = false
   }
 }
 
+const selectedCount = computed(() => selectedItemIds.value.size)
+
+const toggleSelect = (id: string) => {
+  const set = new Set(selectedItemIds.value)
+  if (set.has(id)) set.delete(id)
+  else set.add(id)
+  selectedItemIds.value = set
+}
+
+const isSelected = (id: string) => selectedItemIds.value.has(id)
+
+const clearSelection = () => {
+  selectedItemIds.value = new Set()
+}
+
 // Delete Logic
-const confirmDelete = (item: DriveItem): void => {
+const confirmDelete = (item: DriveItem) => {
   itemToDelete.value = item
   isDeleteModalOpen.value = true
 }
 
-const deleteItem = async (): Promise<void> => {
+const deleteItem = async () => {
   if (!itemToDelete.value) return
 
   deleting.value = true
@@ -1077,12 +970,12 @@ const deleteItem = async (): Promise<void> => {
   }
 }
 
-const confirmBatchDelete = (): void => {
+const confirmBatchDelete = () => {
   if (selectedCount.value === 0) return
   isBatchDeleteModalOpen.value = true
 }
 
-const batchDeleteItems = async (): Promise<void> => {
+const batchDeleteItems = async () => {
   if (selectedCount.value === 0) return
 
   batchDeleting.value = true
@@ -1112,7 +1005,7 @@ const batchDeleteItems = async (): Promise<void> => {
 }
 
 // Share
-const openShareModal = (item: DriveItem): void => {
+const openShareModal = (item: DriveItem) => {
   selectedShareItem.value = item
   const anyonePermission = item.permissions?.find(p => p.type === 'anyone')
 
@@ -1131,13 +1024,13 @@ const openShareModal = (item: DriveItem): void => {
 }
 
 // Rename Logic
-const openRenameModal = (item: DriveItem): void => {
+const openRenameModal = (item: DriveItem) => {
   itemToRename.value = item
   newItemName.value = item.name
   isRenameModalOpen.value = true
 }
 
-const renameItem = async (): Promise<void> => {
+const renameItem = async () => {
   if (!itemToRename.value || !newItemName.value.trim()) return
 
   renaming.value = true
@@ -1169,7 +1062,7 @@ const renameItem = async (): Promise<void> => {
   }
 }
 
-const saveShareSettings = async (): Promise<void> => {
+const saveShareSettings = async () => {
   if (!selectedShareItem.value) return
 
   savingShare.value = true
@@ -1200,7 +1093,7 @@ const saveShareSettings = async (): Promise<void> => {
   }
 }
 
-const copyShareLink = (link: string): void => {
+const copyShareLink = (link: string) => {
   if (!link) return
   navigator.clipboard.writeText(link)
   toast.add({
@@ -1209,7 +1102,7 @@ const copyShareLink = (link: string): void => {
   })
 }
 
-const downloadFile = async (item: DriveItem): Promise<void> => {
+const downloadFile = async (item: DriveItem) => {
   if (item.isFolder) return
   try {
     const url = `/api/drive/download?fileId=${item.id}`
@@ -1231,14 +1124,12 @@ const uploadProgress = ref(0)
 const uploadSpeed = ref('')
 const timeRemaining = ref('')
 
-const uploadFile = async (): Promise<void> => {
+const uploadFile = async () => {
   if (selectedFiles.value.length === 0) return
   uploading.value = true
   uploadProgress.value = 0
   uploadSpeed.value = ''
   timeRemaining.value = ''
-
-  activeUploadController = new AbortController()
 
   try {
     const totalBytes = selectedFiles.value.reduce((sum, file) => sum + file.size, 0)
@@ -1246,17 +1137,14 @@ const uploadFile = async (): Promise<void> => {
     const startTime = Date.now()
 
     for (const file of selectedFiles.value) {
-      if (activeUploadController.signal.aborted) break
-
-      const { uploadUrl } = await $fetch<UploadSessionResponse>('/api/drive/upload?action=create-session', {
+      const { uploadUrl } = await $fetch<{ uploadUrl: string }>('/api/drive/upload?action=create-session', {
         method: 'POST',
         body: {
           name: file.name,
           mimeType: file.type || 'application/octet-stream',
           size: file.size,
           folderId: currentFolderId.value
-        },
-        signal: activeUploadController.signal
+        }
       })
 
       const CHUNK_SIZE = 2 * 1024 * 1024
@@ -1264,8 +1152,6 @@ const uploadFile = async (): Promise<void> => {
       let chunkStart = 0
 
       while (chunkStart < fileSize) {
-        if (activeUploadController.signal.aborted) break
-
         const end = Math.min(chunkStart + CHUNK_SIZE, fileSize)
         const chunk = file.slice(chunkStart, end)
 
@@ -1276,8 +1162,7 @@ const uploadFile = async (): Promise<void> => {
 
         await $fetch('/api/drive/upload', {
           method: 'POST',
-          body: formData,
-          signal: activeUploadController.signal
+          body: formData
         })
 
         const chunkBytes = end - chunkStart
@@ -1301,28 +1186,32 @@ const uploadFile = async (): Promise<void> => {
       }
     }
 
-    if (!activeUploadController.signal.aborted) {
-      const uploadedCount = selectedFiles.value.length
-      toast.add({ title: `تم رفع ${uploadedCount} ملف بنجاح`, color: 'success' })
-      resetSelectedFiles()
-      await refreshFiles()
-    }
-  } catch (err: unknown) {
-    if ((err as { name?: string })?.name !== 'AbortError') {
-      console.error('Chunk Proxy Upload Error:', err)
-      toast.add({ title: 'فشل في رفع الملفات، يرجى المحاولة لاحقاً', color: 'error' })
-    }
+    const uploadedCount = selectedFiles.value.length
+    toast.add({ title: `تم رفع ${uploadedCount} ملف بنجاح`, color: 'success' })
+    resetSelectedFiles()
+    await refreshFiles()
+  } catch (err) {
+    console.error('Chunk Proxy Upload Error:', err)
+    toast.add({ title: 'فشل في رفع الملفات، يرجى المحاولة لاحقاً', color: 'error' })
   } finally {
     uploading.value = false
-    activeUploadController = null
   }
 }
 
-const refreshFiles = async (): Promise<void> => {
+const refreshFiles = async () => {
   refreshing.value = true
   try {
-    const data = await $fetch<DriveFilesResponse>(`/api/drive/files?folderId=${currentFolderId.value}`)
-    files.value = (data.files || []).map((file: DriveApiFile) => ({
+    const data = await $fetch<{
+      files?: Array<{
+        id: string
+        name: string
+        mimeType: string
+        size?: string | number
+        modifiedTime?: string
+        webViewLink?: string
+      }>
+    }>(`/api/drive/files?folderId=${currentFolderId.value}`)
+    files.value = (data.files || []).map(file => ({
       id: file.id,
       name: file.name,
       mimeType: file.mimeType,
@@ -1330,7 +1219,7 @@ const refreshFiles = async (): Promise<void> => {
       modifiedTime: file.modifiedTime || '',
       webViewLink: file.webViewLink || '',
       isFolder: file.mimeType === 'application/vnd.google-apps.folder',
-      permissions: file.permissions || []
+      permissions: (file as { permissions?: Array<{ id: string, type: string, role: string }> }).permissions || []
     }))
   } catch (err) {
     console.error('Failed to fetch files:', err)
@@ -1339,7 +1228,7 @@ const refreshFiles = async (): Promise<void> => {
   }
 }
 
-const logout = async (): Promise<void> => {
+const logout = async () => {
   await clear()
   files.value = []
 }

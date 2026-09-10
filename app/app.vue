@@ -43,15 +43,15 @@ onMounted(async () => {
     :locale="ar"
     :toaster="toaster"
   >
-    <PullToRefresh :on-refresh="handleGlobalRefresh">
-      <NuxtLoadingIndicator
-        color="var(--ui-primary)"
-        error-color="var(--ui-error)"
-        :height="3"
-      />
-      <NuxtLayout />
-      <AppUpdate />
-      <ScrollToTop />
-    </PullToRefresh>
+    <!-- <PullToRefresh :on-refresh="handleGlobalRefresh"> -->
+    <NuxtLoadingIndicator
+      color="var(--ui-primary)"
+      error-color="var(--ui-error)"
+      :height="3"
+    />
+    <NuxtLayout />
+    <AppUpdate />
+    <ScrollToTop />
+    <!-- </PullToRefresh> -->
   </UApp>
 </template>
