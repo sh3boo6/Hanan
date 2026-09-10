@@ -1,10 +1,20 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 const app = {
   name: 'دليل حنان',
-  description: 'صفحة ويب تساعد المستخدم على الوصول للمواقع التي تهم المعلم او الإداري ويوجد بها خدمات تسهّل على الموظف متابعة المهام والأحداث والفعاليات'
+  description: 'صفحة ويب تساعد المستخدم على الوصول للمواقع التي تهم المعلم او الإداري ويوجد بها خدمات تسهّل على الموظف متابعة المهام والأحداث والفعاليات',
+  url: 'https://hanan-azure.vercel.app'
 }
+
 export default defineNuxtConfig({
-  modules: ['@nuxt/eslint', '@nuxt/ui', '@vite-pwa/nuxt', '@nuxt/fonts', '@nuxt/image', '@nuxtjs/sitemap', 'nuxt-auth-utils'],
+  modules: [
+    '@nuxt/eslint',
+    '@nuxt/ui',
+    '@vite-pwa/nuxt',
+    '@nuxt/fonts',
+    '@nuxt/image',
+    '@nuxtjs/sitemap',
+    'nuxt-auth-utils'
+  ],
 
   devtools: {
     enabled: true
@@ -12,12 +22,28 @@ export default defineNuxtConfig({
 
   app: {
     head: {
-      viewport: 'width=device-width, initial-scale=1.0',
+      htmlAttrs: {
+        lang: 'ar',
+        dir: 'rtl'
+      },
+      title: app.name,
+      titleTemplate: `%s - ${app.name}`,
       meta: [
+        { name: 'viewport', content: 'width=device-width, initial-scale=1.0' },
+        { name: 'description', content: app.description },
         { name: 'google-site-verification', content: 'dXG2EaowalmjF3ako0fzYzbkB_xnX8Nej7il2NDwy2M' },
-        { name: 'google-site-verification', content: 'rZMiR7hgwLEdwcvGNrTI8UUpbHMxfaJoRvUvRzWNjqk' }
+        { name: 'google-site-verification', content: 'rZMiR7hgwLEdwcvGNrTI8UUpbHMxfaJoRvUvRzWNjqk' },
+        { property: 'og:type', content: 'website' },
+        { property: 'og:title', content: app.name },
+        { property: 'og:description', content: app.description },
+        { property: 'og:url', content: app.url },
+        { property: 'og:site_name', content: app.name },
+        { name: 'twitter:card', content: 'summary_large_image' },
+        { name: 'twitter:title', content: app.name },
+        { name: 'twitter:description', content: app.description }
       ],
       link: [
+        { rel: 'canonical', href: app.url },
         { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
         { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: 'anonymous' },
         {
@@ -37,8 +63,10 @@ export default defineNuxtConfig({
   css: ['~/assets/css/main.css'],
 
   site: {
-    url: 'https://hanan-azure.vercel.app',
-    name: app.name
+    url: app.url,
+    name: app.name,
+    description: app.description,
+    defaultLocale: 'ar'
   },
 
   runtimeConfig: {
@@ -49,7 +77,7 @@ export default defineNuxtConfig({
   },
 
   routeRules: {
-    '/': { prerender: true }
+    '/': { swr: 3600 }
   },
 
   compatibilityDate: '2026-06-30',
@@ -111,10 +139,10 @@ export default defineNuxtConfig({
     },
     registerType: 'prompt',
     workbox: {
-      navigateFallback: '/',
+      globPatterns: ['**/*.{js,css,html,png,svg,ico}'],
       runtimeCaching: [
         {
-          urlPattern: /^\/api\/auth/,
+          urlPattern: /^\/api\//,
           handler: 'NetworkOnly'
         }
       ]
@@ -122,5 +150,10 @@ export default defineNuxtConfig({
     devOptions: {
       enabled: false
     }
+  },
+
+  sitemap: {
+    autoI18n: false,
+    strictNuxtContentPaths: true
   }
 })
