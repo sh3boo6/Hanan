@@ -27,7 +27,6 @@ export default defineNuxtConfig({
         dir: 'rtl'
       },
       title: app.name,
-      titleTemplate: `%s - ${app.name}`,
       meta: [
         { name: 'viewport', content: 'width=device-width, initial-scale=1.0' },
         { name: 'description', content: app.description },

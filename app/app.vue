@@ -18,7 +18,11 @@ useHead({
 const toaster = { position: 'top-right' }
 
 const title = config.public.appName
-const description = config.public.appName
+const description = config.public.appDescription
+
+useHead({
+  titleTemplate: pageTitle => (!pageTitle || pageTitle === title ? title : `${pageTitle} - ${title}`)
+})
 
 useSeoMeta({
   title,
