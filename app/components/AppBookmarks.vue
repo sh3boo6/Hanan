@@ -99,7 +99,8 @@ const defaultBookmarks: BookmarkCategory[] = [
     icon: 'i-lucide-wrench',
     child: [
       { label: 'تحميل من اليوتيوب', link: 'https://y2mate.gs/', icon: getFaviconUrl('https://y2mate.gs/') },
-      { label: 'تحويل صيغ الملفات من الجهاز', link: 'https://cloudconvert.com', icon: getFaviconUrl('https://cloudconvert.com') }
+      { label: 'تحويل صيغ الملفات من الجهاز', link: 'https://cloudconvert.com', icon: getFaviconUrl('https://cloudconvert.com') },
+      { label: 'ilovepdf (أدوات PDF)', link: 'https://www.ilovepdf.com', icon: getFaviconUrl('https://www.ilovepdf.com') }
     ]
   },
   {
