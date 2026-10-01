@@ -23,6 +23,11 @@ const items = ref<NavigationMenuItem[]>([
     to: '/google'
   },
   {
+    label: 'الرموز',
+    icon: 'i-lucide-symbols',
+    to: '/symbols'
+  },
+  {
     label: 'الاخبار',
     icon: 'i-lucide-newspaper',
     to: '/news'
