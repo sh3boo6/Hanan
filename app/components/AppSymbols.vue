@@ -39,6 +39,16 @@ const groups: SymbolGroup[] = [
     ]
   },
   {
+    id: 'checkbox',
+    title: 'مربعات اختيار',
+    icon: 'i-lucide-square-check-big',
+    items: [
+      { char: '☑', name: 'مربع تحديد ممتلئ' },
+      { char: '☐', name: 'مربع تحديد فارغ' },
+      { char: '☒', name: 'مربع تحديد بعلامة X' }
+    ]
+  },
+  {
     id: 'marks',
     title: 'علامات وصح',
     icon: 'i-lucide-check',

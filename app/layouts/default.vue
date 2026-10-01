@@ -24,7 +24,7 @@ const items = ref<NavigationMenuItem[]>([
   },
   {
     label: 'الرموز',
-    icon: 'i-lucide-symbols',
+    icon: 'i-lucide-omega',
     to: '/symbols'
   },
   {
