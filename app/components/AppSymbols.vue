@@ -48,7 +48,7 @@ const imagesExpanded = ref(true)
 const CORRECT_PIN = ['8', '5', '5', '7'] // 你可以 تغييره إلى أي 4 أرقام تريدها
 
 // قيمة إدخال PIN
-const pinValue = ref<string[]>([])
+const pinValue = ref<(string | number)[]>([])
 
 onMounted(() => {
   if (import.meta.client) {
@@ -71,9 +71,9 @@ const lockImages = () => {
  * يتم استدعاؤها عند إدخال الرقم الرابع
  */
 // تحويل الأرقام العربية (٠-٩) والفارسية (۰-۹) إلى الأرقام اللاتينية
-const normalizeDigits = (value: string[]) =>
+const normalizeDigits = (value: (string | number)[]) =>
   value.map(d =>
-    d
+    String(d)
       .replace(/[٠-٩]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0x0660))
       .replace(/[۰-۹]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0x06F0))
   )
@@ -527,6 +527,7 @@ onBeforeUnmount(() => {
         <div class="flex justify-center">
           <UPinInput
             v-model="pinValue"
+            mask
             dir="ltr"
             :length="4"
             type="number"
