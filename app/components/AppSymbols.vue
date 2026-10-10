@@ -67,12 +67,21 @@ const lockImages = () => {
 }
 
 /**
- * معالجة اكتمال إدخال PIN
- * يتم استدعاؤها عند إدخال الرقم الخامس
+ * معالجة اكتمل إدخال PIN
+ * يتم استدعاؤها عند إدخال الرقم الرابع
  */
+// تحويل الأرقام العربية (٠-٩) والفارسية (۰-۹) إلى الأرقام اللاتينية
+const normalizeDigits = (value: string[]) =>
+  value.map(d =>
+    d
+      .replace(/[٠-٩]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0x0660))
+      .replace(/[۰-۹]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0x06F0))
+  )
+
 const handlePinComplete = (value: string[]) => {
   // التحقق من صحة الرمز
-  const isCorrect = value.every((digit, index) => digit === CORRECT_PIN[index])
+  const normalized = normalizeDigits(value)
+  const isCorrect = normalized.every((digit, index) => digit === CORRECT_PIN[index])
 
   if (isCorrect) {
     // نجاح: فتح الصور
