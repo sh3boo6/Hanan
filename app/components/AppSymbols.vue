@@ -31,7 +31,10 @@ const schoolImages: SchoolImage[] = [
   { src: '/img/sign-black.png', alt: 'توقيع مديرة المدرسة اسود', label: 'توقيع مديرة المدرسة اسود' },
   { src: '/img/sign-white.png', alt: 'توقيع مديرة المدرسة ابيض', label: 'توقيع مديرة المدرسة ابيض' },
   { src: '/img/vision.png', alt: 'رؤية المملكة ٢٠٣٠', label: 'رؤية المملكة ٢٠٣٠' },
-  { src: '/img/logo.png', alt: 'شعار حنان', label: 'شعار حنان' }
+  { src: '/img/logo.png', alt: 'شعار حنان', label: 'شعار حنان' },
+  { src: '/img/td/TD.png', alt: 'يوم المعلم', label: 'يوم المعلم' },
+  { src: '/img/td/TD-black.png', alt: 'يوم المعلم اسود', label: 'يوم المعلم اسود' },
+  { src: '/img/td/TD-white.png', alt: 'يوم المعلم ابيض', label: 'يوم المعلم ابيض' }
 ]
 
 /* ============================================================
@@ -45,10 +48,10 @@ const imagesUnlocked = ref(false)
 const imagesExpanded = ref(true)
 
 // رمز PIN الصحيح (4 أرقام)
-const CORRECT_PIN = ['8', '5', '5', '7'] // 你可以 تغييره إلى أي 4 أرقام تريدها
+const CORRECT_PIN = ['3', '1', '9', '1', '0', '9'] // 你可以 تغييره إلى أي 4 أرقام تريدها
 
 // قيمة إدخال PIN
-const pinValue = ref<(string | number)[]>([])
+const pinValue = ref<number[]>([])
 
 onMounted(() => {
   if (import.meta.client) {
@@ -78,7 +81,7 @@ const normalizeDigits = (value: (string | number)[]) =>
       .replace(/[۰-۹]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0x06F0))
   )
 
-const handlePinComplete = (value: string[]) => {
+const handlePinComplete = (value: (string | number)[]) => {
   // التحقق من صحة الرمز
   const normalized = normalizeDigits(value)
   const isCorrect = normalized.every((digit, index) => digit === CORRECT_PIN[index])
@@ -153,10 +156,6 @@ const downloadImage = async (image: SchoolImage) => {
     console.error(err)
     toast.add({ title: 'تعذر التحميل', description: 'لم يتم تحميل الصورة، حاول مرة أخرى.', color: 'error' })
   }
-}
-
-const openImage = (image: SchoolImage) => {
-  window.open(image.src, '_blank', 'noopener')
 }
 
 /* ============================================================
@@ -508,7 +507,7 @@ onBeforeUnmount(() => {
             />
           </div>
           <h3 class="font-bold text-sm text-foreground">
-            صور
+            صور خاصة
           </h3>
           <span class="ms-auto text-[10px] bg-muted/20 px-2 py-0.5 rounded-full text-muted font-medium">
             {{ schoolImages.length }}
@@ -520,7 +519,7 @@ onBeforeUnmount(() => {
         </div>
 
         <p class="text-xs text-muted text-center">
-          أدخل رمز PIN المكوّن من <span class="font-bold text-primary">4</span> أرقام لعرض الصور
+          أدخل رمز PIN المكوّن من <span class="font-bold text-primary">6</span> أرقام لعرض الصور
         </p>
 
         <!-- مكوّن إدخال PIN -->
@@ -529,7 +528,7 @@ onBeforeUnmount(() => {
             v-model="pinValue"
             mask
             dir="ltr"
-            :length="4"
+            :length="6"
             type="number"
             otp
             placeholder="○"
@@ -625,7 +624,7 @@ onBeforeUnmount(() => {
                   title="تحميل"
                   @click.stop="downloadImage(image)"
                 />
-                <UButton
+                <!-- <UButton
                   size="xs"
                   color="neutral"
                   variant="soft"
@@ -633,7 +632,7 @@ onBeforeUnmount(() => {
                   square
                   title="فتح في تبويب جديد"
                   @click.stop="openImage(image)"
-                />
+                /> -->
               </div>
             </div>
           </div>
