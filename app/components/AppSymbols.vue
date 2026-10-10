@@ -34,24 +34,82 @@ const schoolImages: SchoolImage[] = [
   { src: '/img/logo.png', alt: 'شعار حنان', label: 'شعار حنان' }
 ]
 
-const IMAGES_PASSWORD = '1028319109'
+/* ============================================================
+ *  نظام إظهار الصور (باستخدام UPinInput)
+ *  - افتراضياً مخفية
+ *  - تُفتح بإدخال رمز PIN مكوّن من 4 أرقام
+ *  - الحالة تُحفظ في localStorage
+ * ============================================================ */
+const STORAGE_KEY = 'school-images-visible'
 const imagesUnlocked = ref(false)
-const passwordInput = ref('')
-const passwordError = ref(false)
+const imagesExpanded = ref(true)
+
+// رمز PIN الصحيح (4 أرقام)
+const CORRECT_PIN = ['8', '5', '5', '7'] // 你可以 تغييره إلى أي 4 أرقام تريدها
+
+// قيمة إدخال PIN
+const pinValue = ref<string[]>([])
+
+onMounted(() => {
+  if (import.meta.client) {
+    imagesUnlocked.value = localStorage.getItem(STORAGE_KEY) === '1'
+  }
+})
 
 const unlockImages = () => {
-  if (passwordInput.value === IMAGES_PASSWORD) {
-    imagesUnlocked.value = true
-    passwordInput.value = ''
-    passwordError.value = false
+  imagesUnlocked.value = true
+  if (import.meta.client) localStorage.setItem(STORAGE_KEY, '1')
+}
+
+const lockImages = () => {
+  imagesUnlocked.value = false
+  if (import.meta.client) localStorage.removeItem(STORAGE_KEY)
+}
+
+/**
+ * معالجة اكتمال إدخال PIN
+ * يتم استدعاؤها عند إدخال الرقم الخامس
+ */
+const handlePinComplete = (value: string[]) => {
+  // التحقق من صحة الرمز
+  const isCorrect = value.every((digit, index) => digit === CORRECT_PIN[index])
+
+  if (isCorrect) {
+    // نجاح: فتح الصور
+    unlockImages()
+    pinValue.value = [] // تفريغ الحقل
+
+    if (import.meta.client && 'vibrate' in navigator) {
+      navigator.vibrate([30, 40, 30])
+    }
+
+    toast.add({
+      title: 'تم فتح الصور 🔓',
+      description: 'يمكنك الآن عرض الصور ونسخها.',
+      color: 'success'
+    })
   } else {
-    passwordError.value = true
-    toast.add({ title: 'كلمة مرور خاطئة', description: 'لم يتم تفعيل الصور، حاول مرة أخرى.', color: 'error' })
+    // فشل: إظهار خطأ
+    if (import.meta.client && 'vibrate' in navigator) {
+      navigator.vibrate([100])
+    }
+
+    toast.add({
+      title: 'رمز غير صحيح',
+      description: 'الرمز المدخل غير صحيح، حاول مرة أخرى.',
+      color: 'error'
+    })
+
+    // تفريغ الحقل بعد فترة قصيرة
+    setTimeout(() => {
+      pinValue.value = []
+    }, 500)
   }
 }
 
-const imagesExpanded = ref(true)
-
+/* ============================================================
+ *  أدوات الصور: نسخ / تحميل / فتح في تبويب
+ * ============================================================ */
 const copyImage = async (image: SchoolImage) => {
   try {
     const resp = await fetch(image.src)
@@ -59,21 +117,73 @@ const copyImage = async (image: SchoolImage) => {
     const blob = await resp.blob()
     const mimeType = blob.type || 'image/png'
     await navigator.clipboard.write([
-      new ClipboardItem({
-        [mimeType]: blob
-      })
+      new ClipboardItem({ [mimeType]: blob })
     ])
-    copied.value = image.src
-    if (copiedTimer) clearTimeout(copiedTimer)
-    copiedTimer = setTimeout(() => {
-      copied.value = null
-    }, 1200)
+    flashCopied(image.src)
+    toast.add({ title: 'تم النسخ', description: `نُسخت "${image.label}" إلى الحافظة.`, color: 'success' })
   } catch (err) {
     console.error(err)
     toast.add({ title: 'تعذر النسخ', description: 'لم يتم نسخ الصورة، حاول مرة أخرى.', color: 'error' })
   }
 }
 
+const downloadImage = async (image: SchoolImage) => {
+  try {
+    const resp = await fetch(image.src)
+    if (!resp.ok) throw new Error('fetch failed')
+    const blob = await resp.blob()
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = image.src.split('/').pop() || 'image.png'
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    URL.revokeObjectURL(url)
+  } catch (err) {
+    console.error(err)
+    toast.add({ title: 'تعذر التحميل', description: 'لم يتم تحميل الصورة، حاول مرة أخرى.', color: 'error' })
+  }
+}
+
+const openImage = (image: SchoolImage) => {
+  window.open(image.src, '_blank', 'noopener')
+}
+
+/* ============================================================
+ *  نسخ الرموز
+ * ============================================================ */
+const flashCopied = (key: string) => {
+  copied.value = key
+  if (copiedTimer) clearTimeout(copiedTimer)
+  copiedTimer = setTimeout(() => {
+    copied.value = null
+  }, 1200)
+}
+
+const copySymbol = async (item: SymbolItem) => {
+  try {
+    await navigator.clipboard.writeText(item.char)
+    flashCopied(item.char)
+  } catch (err) {
+    console.error(err)
+    toast.add({ title: 'تعذر النسخ', description: 'لم يتم نسخ الرمز، حاول مرة أخرى.', color: 'error' })
+  }
+}
+
+const copyGroup = async (group: SymbolGroup) => {
+  try {
+    await navigator.clipboard.writeText(group.items.map(i => i.char).join(''))
+    toast.add({ title: 'نسخ', description: `تم نسخ رموز "${group.title}" إلى الحافظة.`, color: 'success' })
+  } catch (err) {
+    console.error(err)
+    toast.add({ title: 'تعذر النسخ', description: 'لم يتم نسخ الرموز، حاول مرة أخرى.', color: 'error' })
+  }
+}
+
+/* ============================================================
+ *  الرموز
+ * ============================================================ */
 const groups: SymbolGroup[] = [
   {
     id: 'apple',
@@ -88,11 +198,7 @@ const groups: SymbolGroup[] = [
       { char: '⎋', name: 'Escape' },
       { char: '↩', name: 'Return' },
       { char: '⇥', name: 'Tab' },
-      { char: '␣', name: 'Space' },
-      { char: '⌘', name: 'Command' },
-      { char: '⌥', name: 'Option' },
-      { char: '⌃', name: 'Control' },
-      { char: '⇧', name: 'Shift' }
+      { char: '␣', name: 'Space' }
     ]
   },
   {
@@ -185,7 +291,6 @@ const groups: SymbolGroup[] = [
       { char: '•', name: 'نقطة كبيرة' },
       { char: '‣', name: 'نقطة مثلثة' },
       { char: '·', name: 'نقطة وسط' },
-      { char: '•', name: 'نقطة' },
       { char: '◦', name: 'نقطة دائرية فارغة' },
       { char: '§', name: 'قسم' },
       { char: '¶', name: 'فقرة' },
@@ -225,7 +330,7 @@ const groups: SymbolGroup[] = [
       { char: '¥', name: 'ين' },
       { char: '₩', name: 'وون' },
       { char: '₪', name: 'شيكل' },
-      { char: '₺', name: 'ليرةتركية' },
+      { char: '₺', name: 'ليرة تركية' },
       { char: '₫', name: 'دون' },
       { char: '₹', name: 'روبية' },
       { char: '₴', name: 'هريفنيا' },
@@ -331,37 +436,12 @@ const groups: SymbolGroup[] = [
       { char: '⌚', name: 'ساعة' },
       { char: '⏰', name: 'منبه' },
       { char: '⚙', name: 'ترس' },
-      { char: '☂', name: 'مظلة' },
       { char: '♻', name: 'تدوير' },
       { char: '⚛', name: 'ذرة' },
       { char: '☢', name: 'إشعاع' }
     ]
   }
 ]
-
-const copySymbol = async (item: SymbolItem) => {
-  try {
-    await navigator.clipboard.writeText(item.char)
-    copied.value = item.char
-    if (copiedTimer) clearTimeout(copiedTimer)
-    copiedTimer = setTimeout(() => {
-      copied.value = null
-    }, 1200)
-  } catch (err) {
-    console.error(err)
-    toast.add({ title: 'تعذر النسخ', description: 'لم يتم نسخ الرمز، حاول مرة أخرى.', color: 'error' })
-  }
-}
-
-const copyGroup = async (group: SymbolGroup) => {
-  try {
-    await navigator.clipboard.writeText(group.items.map(i => i.char).join(''))
-    toast.add({ title: 'نسخ', description: `تم نسخ رموز "${group.title}" إلى الحافظة.`, color: 'success' })
-  } catch (err) {
-    console.error(err)
-    toast.add({ title: 'تعذر النسخ', description: 'لم يتم نسخ الرموز، حاول مرة أخرى.', color: 'error' })
-  }
-}
 
 const filteredGroups = computed(() => {
   const query = searchQuery.value.trim().toLowerCase()
@@ -370,7 +450,10 @@ const filteredGroups = computed(() => {
   return groups
     .map(group => ({
       ...group,
-      items: group.items.filter(item => item.name.toLowerCase().includes(query) || item.char.toLowerCase().includes(query))
+      items: group.items.filter(item =>
+        item.name.toLowerCase().includes(query)
+        || item.char.toLowerCase().includes(query)
+      )
     }))
     .filter(group => group.items.length > 0)
 })
@@ -385,6 +468,7 @@ onBeforeUnmount(() => {
     class="h-full flex flex-col gap-4 w-full"
     dir="rtl"
   >
+    <!-- البحث -->
     <div class="flex flex-col sm:flex-row items-center justify-between gap-3 px-1">
       <div class="relative w-full sm:w-72">
         <UInput
@@ -400,117 +484,154 @@ onBeforeUnmount(() => {
       </p>
     </div>
 
+    <!-- قسم الصور -->
     <div
-      v-if="!imagesUnlocked"
       class="bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border border-default/80 rounded-2xl p-4 flex flex-col gap-3 shadow-sm"
+      :class="{ 'unlock-shake': imagesUnlocked }"
     >
-      <div class="flex items-center gap-2 pb-2.5 border-b border-dashed border-default">
-        <div class="p-1.5 rounded-xl flex w-6 h-6 items-center justify-center bg-primary/10 text-primary">
-          <UIcon
-            name="i-lucide-image"
-            class="w-4 h-4"
-          />
-        </div>
-        <h3 class="font-bold text-sm text-foreground">
-          صور
-        </h3>
-        <span class="ms-auto text-[10px] bg-muted/20 px-2 py-0.5 rounded-full text-muted font-medium">
-          {{ schoolImages.length }}
-        </span>
-        <UIcon
-          name="i-lucide-lock"
-          class="w-4 h-4 text-muted"
-        />
-      </div>
-
-      <form
-        class="flex flex-col gap-3"
-        @submit.prevent="unlockImages"
-      >
-        <p class="text-xs text-muted text-center">
-          لعرض الصور، يُطلب إدخال كلمة المرور
-        </p>
-        <UInput
-          v-model="passwordInput"
-          type="password"
-          placeholder="أدخل كلمة المرور"
-          icon="i-lucide-key"
-          class="w-full"
-          :error="passwordError"
-        />
-        <UButton
-          type="submit"
-          size="sm"
-          color="primary"
-          label="عرض الصور"
-          class="w-full"
-        />
-      </form>
-    </div>
-
-    <div
-      v-else
-      class="bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border border-default/80 rounded-2xl p-4 flex flex-col gap-3 shadow-sm"
-    >
-      <button
-        type="button"
-        class="flex items-center gap-2 pb-2.5 border-b border-dashed border-default w-full text-start"
-        @click="imagesExpanded = !imagesExpanded"
-      >
-        <div class="p-1.5 rounded-xl flex w-6 h-6 items-center justify-center bg-primary/10 text-primary">
-          <UIcon
-            name="i-lucide-image"
-            class="w-4 h-4"
-          />
-        </div>
-        <h3 class="font-bold text-sm text-foreground">
-          صور
-        </h3>
-        <span class="ms-auto text-[10px] bg-muted/20 px-2 py-0.5 rounded-full text-muted font-medium">
-          {{ schoolImages.length }}
-        </span>
-        <UIcon
-          :name="imagesExpanded ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'"
-          class="w-4 h-4 text-muted"
-        />
-      </button>
-
-      <transition
-        enter-active-class="transition duration-200 ease-out"
-        enter-from-class="opacity-0 -translate-y-2"
-        enter-to-class="opacity-100 translate-y-0"
-        leave-active-class="transition duration-150 ease-in"
-        leave-from-class="opacity-100 translate-y-0"
-        leave-to-class="opacity-0 -translate-y-2"
-      >
-        <div
-          v-if="imagesExpanded"
-          class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 gap-3"
-        >
-          <button
-            v-for="image in schoolImages"
-            :key="image.src"
-            type="button"
-            class="group relative flex flex-col items-center justify-center gap-2 p-2 rounded-xl border border-transparent bg-muted/5 hover:bg-primary/10 hover:border-primary/30 transition-all duration-200"
-            :title="image.label"
-            @click="copyImage(image)"
-          >
-            <img
-              :src="image.src"
-              :alt="image.alt"
-              class="w-full max-h-20 object-contain"
-            >
-            <span class="text-[10px] truncate w-full text-center text-muted">{{ image.label }}</span>
+      <!-- الحالة المقفلة -->
+      <template v-if="!imagesUnlocked">
+        <div class="flex items-center gap-2 pb-2.5 border-b border-dashed border-default">
+          <div class="p-1.5 rounded-xl flex w-6 h-6 items-center justify-center bg-primary/10 text-primary">
             <UIcon
-              v-if="copied === image.src"
-              name="i-lucide-check"
-              class="absolute top-1 end-1 w-3.5 h-3.5 text-success"
+              name="i-lucide-image"
+              class="w-4 h-4"
+            />
+          </div>
+          <h3 class="font-bold text-sm text-foreground">
+            صور
+          </h3>
+          <span class="ms-auto text-[10px] bg-muted/20 px-2 py-0.5 rounded-full text-muted font-medium">
+            {{ schoolImages.length }}
+          </span>
+          <UIcon
+            name="i-lucide-lock"
+            class="w-4 h-4 text-muted"
+          />
+        </div>
+
+        <p class="text-xs text-muted text-center">
+          أدخل رمز PIN المكوّن من <span class="font-bold text-primary">4</span> أرقام لعرض الصور
+        </p>
+
+        <!-- مكوّن إدخال PIN -->
+        <div class="flex justify-center">
+          <UPinInput
+            v-model="pinValue"
+            dir="ltr"
+            :length="4"
+            type="number"
+            otp
+            placeholder="○"
+            size="lg"
+            class="mx-auto"
+            @complete="handlePinComplete"
+          />
+        </div>
+      </template>
+
+      <!-- الحالة المفتوحة -->
+      <template v-else>
+        <div class="flex items-center gap-2 pb-2.5 border-b border-dashed border-default">
+          <button
+            type="button"
+            class="flex items-center gap-2 flex-1 text-start"
+            @click="imagesExpanded = !imagesExpanded"
+          >
+            <div class="p-1.5 rounded-xl flex w-6 h-6 items-center justify-center bg-primary/10 text-primary">
+              <UIcon
+                name="i-lucide-image"
+                class="w-4 h-4"
+              />
+            </div>
+            <h3 class="font-bold text-sm text-foreground">
+              صور
+            </h3>
+            <span class="text-[10px] bg-muted/20 px-2 py-0.5 rounded-full text-muted font-medium">
+              {{ schoolImages.length }}
+            </span>
+            <UIcon
+              :name="imagesExpanded ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'"
+              class="w-4 h-4 text-muted"
             />
           </button>
+          <UButton
+            size="xs"
+            color="neutral"
+            variant="ghost"
+            icon="i-lucide-lock"
+            label="إخفاء"
+            class="shrink-0"
+            @click="lockImages"
+          />
         </div>
-      </transition>
+
+        <transition
+          enter-active-class="transition duration-200 ease-out"
+          enter-from-class="opacity-0 -translate-y-2"
+          enter-to-class="opacity-100 translate-y-0"
+          leave-active-class="transition duration-150 ease-in"
+          leave-from-class="opacity-100 translate-y-0"
+          leave-to-class="opacity-0 -translate-y-2"
+        >
+          <div
+            v-if="imagesExpanded"
+            class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 gap-3"
+          >
+            <div
+              v-for="image in schoolImages"
+              :key="image.src"
+              class="group relative flex flex-col items-center justify-center gap-2 p-2 rounded-xl border border-transparent bg-muted/5 hover:bg-primary/10 hover:border-primary/30 transition-all duration-200"
+            >
+              <button
+                type="button"
+                class="w-full flex flex-col items-center gap-2"
+                :title="image.label"
+                @click="copyImage(image)"
+              >
+                <img
+                  :src="image.src"
+                  :alt="image.alt"
+                  class="w-full max-h-20 object-contain"
+                >
+                <span class="text-[10px] truncate w-full text-center text-muted">
+                  {{ image.label }}
+                </span>
+                <UIcon
+                  v-if="copied === image.src"
+                  name="i-lucide-check"
+                  class="absolute top-1 inset-e-1 w-3.5 h-3.5 text-success"
+                />
+              </button>
+
+              <!-- أدوات سريعة تظهر عند المرور -->
+              <div class="absolute top-1 inset-s-1 flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                <UButton
+                  size="xs"
+                  color="neutral"
+                  variant="soft"
+                  icon="i-lucide-download"
+                  square
+                  title="تحميل"
+                  @click.stop="downloadImage(image)"
+                />
+                <UButton
+                  size="xs"
+                  color="neutral"
+                  variant="soft"
+                  icon="i-lucide-external-link"
+                  square
+                  title="فتح في تبويب جديد"
+                  @click.stop="openImage(image)"
+                />
+              </div>
+            </div>
+          </div>
+        </transition>
+      </template>
     </div>
 
+    <!-- قسم الرموز -->
     <div
       v-if="filteredGroups.length > 0"
       class="flex flex-col gap-4 w-full"
@@ -553,18 +674,23 @@ onBeforeUnmount(() => {
             :title="item.name"
             @click="copySymbol(item)"
           >
-            <span class="text-2xl leading-none text-foreground group-hover:text-primary transition-colors">{{ item.char }}</span>
-            <span class="text-[10px] truncate w-full text-center text-muted">{{ item.name }}</span>
+            <span class="text-2xl leading-none text-foreground group-hover:text-primary transition-colors">
+              {{ item.char }}
+            </span>
+            <span class="text-[10px] truncate w-full text-center text-muted">
+              {{ item.name }}
+            </span>
             <UIcon
               v-if="copied === item.char"
               name="i-lucide-check"
-              class="absolute top-1 end-1 w-3.5 h-3.5 text-success"
+              class="absolute top-1 inset-e-1 w-3.5 h-3.5 text-success"
             />
           </button>
         </div>
       </div>
     </div>
 
+    <!-- لا نتائج -->
     <div
       v-else
       class="flex-1 flex flex-col items-center justify-center p-8 border border-dashed border-default rounded-2xl bg-muted/5 text-center gap-2"
@@ -573,7 +699,23 @@ onBeforeUnmount(() => {
         name="i-lucide-search-x"
         class="w-10 h-10 text-muted opacity-50"
       />
-      <span class="font-semibold text-sm">لا توجد نتائج مطابقة لـ "{{ searchQuery }}"</span>
+      <span class="font-semibold text-sm">
+        لا توجد نتائج مطابقة لـ "{{ searchQuery }}"
+      </span>
     </div>
   </div>
 </template>
+
+<style scoped>
+@keyframes unlock-shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-4px); }
+  40% { transform: translateX(4px); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(3px); }
+}
+
+.unlock-shake {
+  animation: unlock-shake 0.4s ease-in-out;
+}
+</style>
